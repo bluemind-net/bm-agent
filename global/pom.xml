@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.agent.global</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<tycho-version>0.23.1</tycho-version>
+		<tycho-extras-version>0.23.1</tycho-extras-version>
+		<bm-plugins-version>1.0.117</bm-plugins-version>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<sonar.language>java</sonar.language>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.reportPath>${session.executionRootDirectory}/target/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.jacoco.excludes>**/*Tests*.class,**/closed/**/**,**/open/plugins/**/**,**/open/ui/**/**,**/open/clients/**/**</sonar.jacoco.excludes>
+		<l10n.list>"de", "en", "es", "fr", "hu", "it", "nl", "pl", "ru", "sk",
+			"uk", "zh"</l10n.list>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>bluemind-deps</id>
+			<layout>p2</layout>
+			<url>http://forge.blue-mind.net/staging/p2/dependencies/163/</url>
+		</repository>
+		<repository>
+			<id>tigase</id>
+			<url>http://build.tigase.org/maven</url>
+
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>nexus-central</id>
+			<url>http://forge.blue-mind.net/nexus/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
+		</repository>
+
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>bm-maven-plugins</id>
+			<url>http://forge.blue-mind.net/nexus/content/repositories/snapshots</url>
+
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+
+		<pluginRepository>
+			<id>bm-maven-plugins-releases</id>
+			<url>http://forge.blue-mind.net/nexus/content/repositories/releases</url>
+
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.5.1</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+					<executions>
+						<execution>
+							<id>compiletests</id>
+							<phase>test-compile</phase>
+							<goals>
+								<goal>testCompile</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.6.1</version>
+					<configuration>
+						<filesets>
+							<fileset>
+								<directory>${basedir}/generated</directory>
+							</fileset>
+						</filesets>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.2.1</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>jar</goal>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-maven-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<extensions>true</extensions>
+					<configuration>
+						<encoding>UTF-8</encoding>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
+					<version>${tycho-version}</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-compiler-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+						<annotationProcessors>
+							<annotationProcessor>net.bluemind.codegen.processor.MetaModelProcessor</annotationProcessor>
+						</annotationProcessors>
+						<generatedSourcesDirectory>${basedir}/generated</generatedSourcesDirectory>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>net.bluemind</groupId>
+							<artifactId>net.bluemind.codegen.metamodel</artifactId>
+							<version>${bm-plugins-version}</version>
+							<scope>compile</scope>
+						</dependency>
+					</dependencies>
+				</plugin>
+
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-source-plugin</artifactId>
+					<version>${tycho-version}</version>
+
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-surefire-plugin</artifactId>
+					<version>${tycho-version}</version>
+
+					<inherited>true</inherited>
+					<configuration>
+						<includes>
+							<include>**/*TestCase.java</include>
+							<include>**/Test*.java</include>
+							<include>**/*Tests.java</include>
+						</includes>
+						<showEclipseLog>true</showEclipseLog>
+						<useUIHarness>false</useUIHarness>
+						<useUIThread>false</useUIThread>
+						<failIfNoTests>false</failIfNoTests>
+						<product>org.eclipse.platform.ide</product>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.12.4</version>
+					<executions>
+						<execution>
+							<id>test</id>
+							<phase>test</phase>
+							<configuration>
+								<includes>
+									<include>**/*Test.java</include>
+								</includes>
+								<testClassesDirectory>${basedir}/target/classes</testClassesDirectory>
+							</configuration>
+							<goals>
+								<goal>test</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.2.201409121644</version>
+					<configuration>
+						<destFile>${sonar.jacoco.reportPath}</destFile>
+						<append>true</append>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>target-platform-configuration</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<environments>
+							<environment>
+								<os>linux</os>
+								<ws>gtk</ws>
+								<arch>x86_64</arch>
+							</environment>
+						</environments>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-versions-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>yuicompressor-maven-plugin</artifactId>
+					<version>1.5.1</version>
+					<executions>
+						<execution>
+							<phase>prepare-package</phase>
+							<goals>
+								<goal>compress</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<gzip>true</gzip>
+						<force>true</force>
+						<disableOptimizations>true</disableOptimizations>
+						<jswarn>false</jswarn>
+
+						<nomunge>true</nomunge>
+						<nosuffix>true</nosuffix>
+						<outputDirectory>web-resources</outputDirectory>
+						<sourceDirectory>web-resources</sourceDirectory>
+						<webappDirectory>web-resources</webappDirectory>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>net.bluemind</groupId>
+					<artifactId>bm-docker-maven-plugin</artifactId>
+					<version>${bm-plugins-version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>start</goal>
+								<goal>stop</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>net.bluemind</groupId>
+					<artifactId>bm-packaging-maven-plugin</artifactId>
+					<version>${bm-plugins-version}</version>
+				</plugin>
+			</plugins>
+
+		</pluginManagement>
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>bm_releases</id>
+			<url>http://forge.blue-mind.net/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>bm_snapshots</id>
+			<url>http://forge.blue-mind.net/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.7</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+</project>

@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>net.bluemind.bm-agent</artifactId>
+	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>net.bluemind</groupId>
+		<artifactId>net.bluemind.agent</artifactId>
+		<version>3.1.0-SNAPSHOT</version>
+	</parent>
+
+	<modules>
+		<module>bm-agent-client</module>
+		<module>bm-agent-server</module>
+	</modules>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>net.bluemind</groupId>
+				<artifactId>bm-docker-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>start</goal>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<configuration>
+					<additionalFileSets>
+						<fileSet>
+							<directory>${basedir}/generated/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileSet>
+
+						<fileSet>
+							<directory>${basedir}/src/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileSet>
+					</additionalFileSets>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
