@@ -20,34 +20,41 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class Message {
 
-import net.bluemind.agent.server.internal.AgentServer;
+	private String id;
+	private String command;
+	private byte[] data;
 
-public class AgentServerModule implements BundleActivator {
+	public String getId() {
+		return id;
+	}
 
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
+	public void setId(String id) {
+		this.id = id;
+	}
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
+	public String getCommand() {
+		return command;
+	}
 
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
+	public void setCommand(String command) {
+		this.command = command;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
 	}
 
 	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
-	}
-
-	public static void main(String[] args) throws Exception {
-		new AgentServerModule().start(null);
+	public String toString() {
+		return String.format("Id: %s\r\nCommand: %s", id, command);
 	}
 
 }

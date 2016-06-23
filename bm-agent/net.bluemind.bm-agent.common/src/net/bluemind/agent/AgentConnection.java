@@ -20,34 +20,38 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.http.WebSocketBase;
 
-import net.bluemind.agent.server.internal.AgentServer;
+public class AgentConnection<T extends WebSocketBase<T>> implements Connection {
 
-public class AgentServerModule implements BundleActivator {
+	private final String command;
+	private final String id;
+	private final T websocket;
+	private MessageParser parser;
 
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
+	private static final Logger logger = LoggerFactory.getLogger(AgentConnection.class);
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
-
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
+	public AgentConnection(String command, String id, T websocket) {
+		this.command = command;
+		this.id = id;
+		this.websocket = websocket;
+		parser = new MessageParser();
 	}
 
 	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
-	}
-
-	public static void main(String[] args) throws Exception {
-		new AgentServerModule().start(null);
+	public void send(byte[] data) throws Exception {
+		Message message = new Message();
+		message.setId(id);
+		message.setCommand(command);
+		message.setData(data);
+		logger.info("sending {}", message);
+		Buffer buffer = new Buffer(parser.write(message));
+		websocket.write(buffer);
 	}
 
 }

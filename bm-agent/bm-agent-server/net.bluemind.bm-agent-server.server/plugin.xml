@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="net.bluemind.agent.server" name="serverhandler" schema="schema/net.bluemind.agent.server.exsd"/>
+   <extension
+         id="agentServerLauncher"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="net.bluemind.agent.server.ServerApplication">
+         </run>
+      </application>
+   </extension>
+   <extension
+         id="bmagentserver"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="net.bluemind.bm-agent-server.server.agentServerLauncher"
+            name="bluemind.agent.server">
+         <property
+               name="appName"
+               value="bluemind.agent.server">
+         </property>
+      </product>
+   </extension>
+   
+</plugin>

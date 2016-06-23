@@ -23,26 +23,38 @@
 package net.bluemind.agent.server.internal;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.http.HttpServer;
+import org.vertx.java.core.http.ServerWebSocket;
+
+import net.bluemind.agent.AgentConnection;
+import net.bluemind.agent.Message;
+import net.bluemind.agent.MessageParser;
+import net.bluemind.agent.server.internal.HandlerRegistry.AgentHandler;
+import net.bluemind.agent.server.internal.PluginLoader.ServerHandler;
 
 public class AgentServer {
 
 	private static final int PORT = 8086;
 	private final Vertx vertx;
+	private final MessageParser parser;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentServer.class);
 
 	public AgentServer() {
 		this.vertx = VertxFactory.newVertx();
+		this.parser = new MessageParser();
 	}
 
 	public void start() {
 		logger.info("Starting BM Agent Server on port {}", PORT);
+		registerHandlers();
 		HttpServer server = vertx.createHttpServer();
 
 		server.websocketHandler(ws -> {
@@ -50,11 +62,35 @@ public class AgentServer {
 					ws.remoteAddress().getAddress().toString());
 			ws.dataHandler(data -> {
 				String value = new String(data.getBytes());
-				logger.info(value);
+				handleMessage(ws, value);
 			});
 		}).listen(PORT, "localhost");
 
 		block();
+	}
+
+	private void handleMessage(ServerWebSocket ws, String value) {
+		try {
+			Message message = parser.read(value);
+			logger.info("Incoming Message: {}", message);
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(message.getCommand());
+			handler.ifPresent(h -> {
+				logger.info("Found handler {} for command {}", h.info, message.getCommand());
+				h.handler.onMessage(new AgentConnection<ServerWebSocket>(message.getCommand(), message.getId(), ws),
+						message);
+			});
+		} catch (Exception e) {
+			logger.warn("Error while handling message", e);
+		}
+
+	}
+
+	private void registerHandlers() {
+		List<ServerHandler> plugins = PluginLoader.load();
+		plugins.forEach(plugin -> {
+			logger.info("Registering plugin {} for command {}", plugin.name, plugin.command);
+			HandlerRegistry.getInstance().register(plugin.command, plugin.handler, plugin.name);
+		});
 	}
 
 	private void block() {

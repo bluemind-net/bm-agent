@@ -20,34 +20,23 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent.client;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
 
-import net.bluemind.agent.server.internal.AgentServer;
-
-public class AgentServerModule implements BundleActivator {
-
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
+public class ClientApplication implements IApplication {
 
 	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
+	public Object start(IApplicationContext context) throws Exception {
+		new AgentClientModule().start(null);
 
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
+		return IApplication.EXIT_OK;
 	}
 
 	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
-	}
+	public void stop() {
 
-	public static void main(String[] args) throws Exception {
-		new AgentServerModule().start(null);
 	}
 
 }

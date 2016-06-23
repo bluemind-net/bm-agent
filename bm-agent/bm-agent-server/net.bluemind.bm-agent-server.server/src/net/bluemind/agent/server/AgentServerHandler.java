@@ -22,32 +22,12 @@
  */
 package net.bluemind.agent.server;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.bluemind.agent.Message;
+import net.bluemind.agent.Connection;
 
-import net.bluemind.agent.server.internal.AgentServer;
+@FunctionalInterface
+public interface AgentServerHandler {
 
-public class AgentServerModule implements BundleActivator {
-
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
-
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
-	}
-
-	public static void main(String[] args) throws Exception {
-		new AgentServerModule().start(null);
-	}
+	public void onMessage(Connection agentConnection, Message message);
 
 }

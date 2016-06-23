@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="bluemind.agent.server" uid="agent.server" id="net.bluemind.application.launcher.agent.server" application="net.bluemind.application.launcher.agent.server" version="3.1.0.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="bluemind.agent.server" uid="agent.server" id="net.bluemind.bm-agent-server.server.bmagentserver" application="net.bluemind.bm-agent-server.server.agentServerLauncher" version="3.1.0.qualifier" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -28,6 +28,34 @@
    </vm>
 
    <plugins>
+      <plugin id="ch.qos.logback.classic"/>
+      <plugin id="ch.qos.logback.core"/>
+      <plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
+      <plugin id="com.fasterxml.jackson.core.jackson-core"/>
+      <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
+      <plugin id="com.google.guava"/>
+      <plugin id="io.netty"/>
+      <plugin id="io.vertx.core"/>
+      <plugin id="io.vertx.platform"/>
+      <plugin id="javax.annotation"/>
+      <plugin id="javax.inject"/>
+      <plugin id="jcl.over.slf4j"/>
+      <plugin id="jul.to.slf4j"/>
+      <plugin id="net.bluemind.bm-agent-server.server"/>
+      <plugin id="net.bluemind.bm-agent.common"/>
+      <plugin id="net.bluemind.bm-agent.server.ping"/>
+      <plugin id="net.bluemind.eclipse.common"/>
+      <plugin id="net.bluemind.lib.jackson"/>
+      <plugin id="net.bluemind.slf4j"/>
+      <plugin id="net.bluemind.slf4j.configuration" fragment="true"/>
+      <plugin id="org.eclipse.core.contenttype"/>
+      <plugin id="org.eclipse.core.jobs"/>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.equinox.app"/>
+      <plugin id="org.eclipse.equinox.common"/>
+      <plugin id="org.eclipse.equinox.preferences"/>
+      <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.osgi"/>
       <plugin id="slf4j.api"/>
    </plugins>
 

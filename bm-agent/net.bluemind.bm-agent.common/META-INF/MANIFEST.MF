@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: net.bluemind.bm-agent.common
+Bundle-SymbolicName: net.bluemind.bm-agent.common;singleton:=true
+Bundle-Version: 3.1.0.qualifier
+Bundle-Vendor: www.blue-mind.net
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: net.bluemind.lib.jackson,
+ io.vertx.core,
+ slf4j.api
+Export-Package: net.bluemind.agent

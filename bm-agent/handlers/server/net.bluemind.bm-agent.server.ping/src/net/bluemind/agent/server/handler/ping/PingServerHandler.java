@@ -20,34 +20,27 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent.server.handler.ping;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.bluemind.agent.server.internal.AgentServer;
+import net.bluemind.agent.Connection;
+import net.bluemind.agent.Message;
+import net.bluemind.agent.server.AgentServerHandler;
 
-public class AgentServerModule implements BundleActivator {
+public class PingServerHandler implements AgentServerHandler {
 
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
-
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
-	}
+	Logger logger = LoggerFactory.getLogger(PingServerHandler.class);
 
 	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
-	}
-
-	public static void main(String[] args) throws Exception {
-		new AgentServerModule().start(null);
+	public void onMessage(Connection agentConnection, Message message) {
+		logger.info("Received a ping message: {}", new String(message.getData()));
+		try {
+			agentConnection.send("pong".getBytes());
+		} catch (Exception e) {
+			logger.warn("Cannot reply to ping", e);
+		}
 	}
 
 }

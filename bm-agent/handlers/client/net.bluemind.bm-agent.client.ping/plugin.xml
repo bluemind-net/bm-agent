@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="net.bluemind.agent.client">
+      <handler
+            command="ping"
+            impl="net.bluemind.agent.client.handler.ping.PingClientHandler"
+            name="BlueMind Ping Handler">
+      </handler>
+   </extension>
+   
+
+</plugin>

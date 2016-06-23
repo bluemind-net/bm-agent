@@ -8,4 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.osgi,
  net.bluemind.slf4j,
  io.vertx.core;bundle-version="2.1.6",
- io.netty;bundle-version="4.0.33"
+ io.netty;bundle-version="4.0.33",
+ net.bluemind.bm-agent.common,
+ org.eclipse.core.runtime
+Export-Package: net.bluemind.agent.client

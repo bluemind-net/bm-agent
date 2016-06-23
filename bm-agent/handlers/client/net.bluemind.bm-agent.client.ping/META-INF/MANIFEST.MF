@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: net.bluemind.bm-agent.client.ping
+Bundle-SymbolicName: net.bluemind.bm-agent.client.ping;singleton:=true
+Bundle-Version: 3.1.0.qualifier
+Bundle-Vendor: www.blue-mind.net
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.osgi,
+ net.bluemind.slf4j,
+ net.bluemind.bm-agent.common,
+ org.eclipse.core.runtime,
+ net.bluemind.bm-agent-server.client,
+ slf4j.api

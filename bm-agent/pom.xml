@@ -13,6 +13,8 @@
 	<modules>
 		<module>bm-agent-client</module>
 		<module>bm-agent-server</module>
+		<module>net.bluemind.bm-agent.common</module>
+		<module>handlers</module>
 	</modules>
 
 	<build>

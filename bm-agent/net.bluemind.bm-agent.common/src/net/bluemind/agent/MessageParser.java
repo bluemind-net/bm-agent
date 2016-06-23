@@ -20,34 +20,24 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.bluemind.agent.server.internal.AgentServer;
+public class MessageParser {
 
-public class AgentServerModule implements BundleActivator {
+	ObjectMapper mapper;
 
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
-
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
+	public MessageParser() {
+		mapper = new ObjectMapper();
 	}
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
+	public Message read(String json) throws Exception {
+		return mapper.readValue(json, Message.class);
 	}
 
-	public static void main(String[] args) throws Exception {
-		new AgentServerModule().start(null);
+	public String write(Message message) throws Exception {
+		return mapper.writeValueAsString(message);
 	}
 
 }

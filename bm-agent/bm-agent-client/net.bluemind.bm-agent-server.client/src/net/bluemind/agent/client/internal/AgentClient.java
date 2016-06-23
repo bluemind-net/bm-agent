@@ -23,26 +23,36 @@
 package net.bluemind.agent.client.internal;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
-import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.WebSocket;
+
+import net.bluemind.agent.AgentConnection;
+import net.bluemind.agent.Message;
+import net.bluemind.agent.MessageParser;
+import net.bluemind.agent.client.internal.HandlerRegistry.AgentHandler;
+import net.bluemind.agent.client.internal.PluginLoader.ClientHandler;
 
 public class AgentClient {
 
 	private static final int PORT = 8086;
 	private final Vertx vertx;
 	private WebSocket ws;
+	private final MessageParser parser;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
 	public AgentClient() {
 		this.vertx = VertxFactory.newVertx();
+		this.parser = new MessageParser();
 	}
 
 	public void start() throws Exception {
@@ -50,9 +60,8 @@ public class AgentClient {
 		CountDownLatch latch = new CountDownLatch(1);
 		connect(latch);
 		latch.await();
-		send("Hello from the Client");
-		send("Hello from the Client2");
-		send("Hello from the Client3");
+
+		registerHandlers();
 
 		block();
 	}
@@ -72,18 +81,38 @@ public class AgentClient {
 		client.connectWebsocket("/", (ws -> {
 			logger.info("Connected to websocket");
 			this.ws = ws;
+			ws.dataHandler(data -> {
+				String value = new String(data.getBytes());
+				handleMessage(ws, value);
+			});
+
 			latch.countDown();
 		}));
 	}
 
-	private void send(String data) {
-		send(data.getBytes());
+	private void handleMessage(WebSocket ws, String value) {
+		try {
+			Message message = parser.read(value);
+			logger.info("Incoming Message: {}", message);
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(message.getCommand());
+			handler.ifPresent(h -> {
+				logger.info("Found handler {} for command {}", h.info, message.getCommand());
+				h.handler.onMessage(message.getData());
+			});
+		} catch (Exception e) {
+			logger.warn("Error while handling message", e);
+		}
+
 	}
 
-	private void send(byte[] data) {
-		logger.info("sending {}", new String(data));
-		Buffer buffer = new Buffer(data);
-		ws.write(buffer);
+	private void registerHandlers() {
+		List<ClientHandler> plugins = PluginLoader.load();
+		plugins.forEach(plugin -> {
+			logger.info("Registering plugin {} for command {}", plugin.name, plugin.command);
+			String id = UUID.randomUUID().toString();
+			HandlerRegistry.getInstance().register(plugin.command, plugin.handler, plugin.name);
+			plugin.handler.onInitialize(new AgentConnection<WebSocket>(plugin.command, id, ws));
+		});
 	}
 
 }

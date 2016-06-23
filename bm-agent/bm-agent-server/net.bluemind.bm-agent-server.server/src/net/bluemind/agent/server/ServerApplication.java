@@ -22,32 +22,21 @@
  */
 package net.bluemind.agent.server;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
 
-import net.bluemind.agent.server.internal.AgentServer;
-
-public class AgentServerModule implements BundleActivator {
-
-	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
+public class ServerApplication implements IApplication {
 
 	@Override
-	public void start(BundleContext context) throws Exception {
-		logger.info("Starting BlueMind Agent Server");
-
-		AgentServer agentServer = new AgentServer();
-		agentServer.start();
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		logger.info("Stopping BlueMind Agent Server");
-	}
-
-	public static void main(String[] args) throws Exception {
+	public Object start(IApplicationContext context) throws Exception {
 		new AgentServerModule().start(null);
+
+		return IApplication.EXIT_OK;
+	}
+
+	@Override
+	public void stop() {
+
 	}
 
 }

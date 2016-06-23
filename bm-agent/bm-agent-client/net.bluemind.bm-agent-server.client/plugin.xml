@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="net.bluemind.agent.client" name="clienthandler" schema="schema/net.bluemind.agent.client.exsd"/>
+   
+   <extension
+         id="agentClientLauncher"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="net.bluemind.agent.client.ClientApplication">
+         </run>
+      </application>
+   </extension>
+ 
+   <extension
+         id="agentClient"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="net.bluemind.bm-agent-server.client.agentClientLauncher"
+            name="bluemind.agent.client">
+         <property
+               name="appName"
+               value="bluemind.agent.client">
+         </property>
+      </product>
+   </extension>
+   
+
+</plugin>
