@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: net.bluemind.bm-agent.server.port-redirect
+Bundle-SymbolicName: net.bluemind.bm-agent.server.port-redirect;singleton:=true
+Bundle-Version: 3.1.0.qualifier
+Bundle-Vendor: www.blue-mind.net
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.osgi,
+ net.bluemind.slf4j,
+ net.bluemind.bm-agent.common,
+ org.eclipse.core.runtime;bundle-version="3.11.1",
+ io.vertx.core,
+ io.netty

@@ -43,6 +43,7 @@
       <plugin id="jul.to.slf4j"/>
       <plugin id="net.bluemind.bm-agent-server.client"/>
       <plugin id="net.bluemind.bm-agent.client.ping"/>
+      <plugin id="net.bluemind.bm-agent.client.port-redirect"/>
       <plugin id="net.bluemind.bm-agent.common"/>
       <plugin id="net.bluemind.eclipse.common"/>
       <plugin id="net.bluemind.lib.jackson"/>

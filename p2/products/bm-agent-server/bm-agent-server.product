@@ -44,6 +44,7 @@
       <plugin id="net.bluemind.bm-agent-server.server"/>
       <plugin id="net.bluemind.bm-agent.common"/>
       <plugin id="net.bluemind.bm-agent.server.ping"/>
+      <plugin id="net.bluemind.bm-agent.server.port-redirect"/>
       <plugin id="net.bluemind.eclipse.common"/>
       <plugin id="net.bluemind.lib.jackson"/>
       <plugin id="net.bluemind.lib.vertx"/>

@@ -10,7 +10,8 @@
 	<packaging>pom</packaging>
 	
 	<modules>
-		<module>net.bluemind.bm-agent.server.ping</module>		
+		<module>net.bluemind.bm-agent.server.ping</module>
+		<module>net.bluemind.bm-agent.server.port-redirect</module>		
 	</modules>
 
 </project>
