@@ -7,5 +7,7 @@ Bundle-Vendor: www.blue-mind.net
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: net.bluemind.lib.jackson,
  io.vertx.core,
- slf4j.api
+ slf4j.api,
+ io.vertx.platform,
+ net.bluemind.lib.vertx;bundle-version="3.1.7178"
 Export-Package: net.bluemind.agent

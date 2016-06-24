@@ -46,6 +46,7 @@
       <plugin id="net.bluemind.bm-agent.server.ping"/>
       <plugin id="net.bluemind.eclipse.common"/>
       <plugin id="net.bluemind.lib.jackson"/>
+      <plugin id="net.bluemind.lib.vertx"/>
       <plugin id="net.bluemind.slf4j"/>
       <plugin id="net.bluemind.slf4j.configuration" fragment="true"/>
       <plugin id="org.eclipse.core.contenttype"/>

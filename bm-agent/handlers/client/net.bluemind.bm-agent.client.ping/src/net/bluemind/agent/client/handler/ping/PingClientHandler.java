@@ -32,19 +32,25 @@ public class PingClientHandler implements AgentClientHandler {
 
 	Logger logger = LoggerFactory.getLogger(PingClientHandler.class);
 
-	@Override
-	public void onInitialize(Connection connection) {
-		logger.info("Pinging server");
-		try {
-			connection.send("Hello from the Gutter".getBytes());
-		} catch (Exception e) {
-			logger.warn("Cannot ping server", e);
-		}
-	}
+	private String id;
+	private String command;
 
 	@Override
 	public void onMessage(byte[] data) {
 		logger.info("Got a message: {}", new String(data));
+	}
+
+	@Override
+	public void onInitialize(String id, String command, Connection connection) {
+		this.id = id;
+		this.command = command;
+		logger.info("Pinging server");
+		try {
+			connection.send(id, command, "ping".getBytes());
+		} catch (Exception e) {
+			logger.warn("Cannot ping server", e);
+		}
+
 	}
 
 }

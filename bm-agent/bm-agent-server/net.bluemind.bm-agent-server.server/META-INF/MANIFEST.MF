@@ -10,5 +10,6 @@ Require-Bundle: org.eclipse.osgi,
  io.vertx.core;bundle-version="2.1.6",
  io.netty;bundle-version="4.0.33",
  org.eclipse.core.runtime;bundle-version="3.11.1",
- net.bluemind.bm-agent.common
+ net.bluemind.bm-agent.common,
+ io.vertx.platform;bundle-version="2.1.6"
 Export-Package: net.bluemind.agent.server

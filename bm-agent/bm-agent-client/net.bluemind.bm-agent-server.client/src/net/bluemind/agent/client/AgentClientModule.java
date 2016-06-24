@@ -22,22 +22,31 @@
  */
 package net.bluemind.agent.client;
 
+import java.net.URL;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.bluemind.agent.client.internal.AgentClient;
+import org.vertx.java.core.Vertx;
+import org.vertx.java.platform.PlatformManager;
+import org.vertx.java.platform.impl.DefaultPlatformManagerFactory;
 
 public class AgentClientModule implements BundleActivator {
 
 	private static Logger logger = LoggerFactory.getLogger(AgentClientModule.class);
+	public static Vertx vertx;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Client");
 
-		new AgentClient().start();
+		PlatformManager pm = new DefaultPlatformManagerFactory().createPlatformManager();
+		AgentClientModule.vertx = pm.vertx();
+		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClient", null, new URL[0], 1, null, null);
+		pm.deployWorkerVerticle(true, "net.bluemind.agent.client.internal.AgentClientVerticle", null, new URL[0], 10,
+				null, null);
+
 	}
 
 	@Override

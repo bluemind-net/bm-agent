@@ -22,7 +22,7 @@
  */
 package net.bluemind.agent;
 
-public class Message {
+public class BmMessage {
 
 	private String id;
 	private String command;

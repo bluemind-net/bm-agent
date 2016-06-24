@@ -22,12 +22,11 @@
  */
 package net.bluemind.agent.server;
 
-import net.bluemind.agent.Message;
 import net.bluemind.agent.Connection;
 
 @FunctionalInterface
 public interface AgentServerHandler {
 
-	public void onMessage(Connection agentConnection, Message message);
+	public void onMessage(String id, String command, byte[] data, Connection connection);
 
 }

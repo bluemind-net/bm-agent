@@ -22,60 +22,72 @@
  */
 package net.bluemind.agent.client.internal;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VertxFactory;
+import org.vertx.java.core.Handler;
+import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.WebSocket;
+import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.platform.Verticle;
 
-import net.bluemind.agent.AgentConnection;
-import net.bluemind.agent.Message;
+import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
 import net.bluemind.agent.client.internal.HandlerRegistry.AgentHandler;
 import net.bluemind.agent.client.internal.PluginLoader.ClientHandler;
 
-public class AgentClient {
+public class AgentClient extends Verticle {
 
 	private static final int PORT = 8086;
-	private final Vertx vertx;
+	public static final String address = "agent.send";
 	private WebSocket ws;
 	private final MessageParser parser;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
 	public AgentClient() {
-		this.vertx = VertxFactory.newVertx();
 		this.parser = new MessageParser();
 	}
 
-	public void start() throws Exception {
+	@Override
+	public void start() {
 		logger.info("Starting BM Agent Client");
-		CountDownLatch latch = new CountDownLatch(1);
-		connect(latch);
-		latch.await();
+		connect();
 
-		registerHandlers();
+		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
 
-		block();
+			@Override
+			public void handle(Message<JsonObject> event) {
+				String command = event.body().getString("command");
+				String id = event.body().getString("id");
+				byte[] data = event.body().getBinary("data");
+
+				logger.info("handling message to server {}, command: {}", id, command);
+				send(command, id, data);
+			}
+		});
+
 	}
 
-	private void block() {
+	private void send(String command, String id, byte[] data) {
+		BmMessage message = new BmMessage();
+		message.setId(id);
+		message.setCommand(command);
+		message.setData(data);
 		try {
-			System.in.read();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Buffer buffer = new Buffer(parser.write(message));
+			ws.write(buffer);
+		} catch (Exception e) {
+			logger.warn("Cannot send reply to client", e);
 		}
 	}
 
-	private void connect(final CountDownLatch latch) {
+	private void connect() {
 		HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(PORT);
 
 		client.connectWebsocket("/", (ws -> {
@@ -86,13 +98,13 @@ public class AgentClient {
 				handleMessage(ws, value);
 			});
 
-			latch.countDown();
+			registerHandlers();
 		}));
 	}
 
 	private void handleMessage(WebSocket ws, String value) {
 		try {
-			Message message = parser.read(value);
+			BmMessage message = parser.read(value);
 			logger.info("Incoming Message: {}", message);
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(message.getCommand());
 			handler.ifPresent(h -> {
@@ -111,7 +123,12 @@ public class AgentClient {
 			logger.info("Registering plugin {} for command {}", plugin.name, plugin.command);
 			String id = UUID.randomUUID().toString();
 			HandlerRegistry.getInstance().register(plugin.command, plugin.handler, plugin.name);
-			plugin.handler.onInitialize(new AgentConnection<WebSocket>(plugin.command, id, ws));
+			JsonObject obj = new JsonObject() //
+					.putString("id", id) //
+					.putString("command", plugin.command) //
+					.asObject();
+
+			vertx.eventBus().send(AgentClientVerticle.address_init, obj);
 		});
 	}
 

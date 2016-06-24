@@ -32,11 +32,11 @@ public class MessageParser {
 		mapper = new ObjectMapper();
 	}
 
-	public Message read(String json) throws Exception {
-		return mapper.readValue(json, Message.class);
+	public BmMessage read(String json) throws Exception {
+		return mapper.readValue(json, BmMessage.class);
 	}
 
-	public String write(Message message) throws Exception {
+	public String write(BmMessage message) throws Exception {
 		return mapper.writeValueAsString(message);
 	}
 

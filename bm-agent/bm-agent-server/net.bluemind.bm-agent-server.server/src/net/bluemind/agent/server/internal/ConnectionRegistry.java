@@ -20,27 +20,36 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server.handler.ping;
+package net.bluemind.agent.server.internal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import net.bluemind.agent.Connection;
-import net.bluemind.agent.server.AgentServerHandler;
+import org.vertx.java.core.http.ServerWebSocket;
 
-public class PingServerHandler implements AgentServerHandler {
+public class ConnectionRegistry {
 
-	Logger logger = LoggerFactory.getLogger(PingServerHandler.class);
+	private Map<String, ServerWebSocket> connections;
 
-	@Override
-	public void onMessage(String id, String command, byte[] data, Connection connection) {
-		logger.info("Received a ping message from {}: {}", id, new String(data));
-		try {
-			connection.send(id, command, "pong".getBytes());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private ConnectionRegistry() {
+		this.connections = new HashMap<>();
+	}
+
+	public Optional<ServerWebSocket> get(String id) {
+		return Optional.ofNullable(connections.get(id));
+	}
+
+	public void register(String id, ServerWebSocket connection) {
+		connections.putIfAbsent(id, connection);
+	}
+
+	private static class Holder {
+		private static final ConnectionRegistry INSTANCE = new ConnectionRegistry();
+	}
+
+	public static ConnectionRegistry getInstance() {
+		return Holder.INSTANCE;
 	}
 
 }
