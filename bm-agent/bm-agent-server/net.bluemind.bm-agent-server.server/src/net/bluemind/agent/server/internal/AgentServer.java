@@ -36,7 +36,10 @@ import org.vertx.java.platform.Verticle;
 
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
-import net.bluemind.agent.server.internal.PluginLoader.ServerHandler;
+import net.bluemind.agent.server.internal.connection.ConnectionRegistry;
+import net.bluemind.agent.server.internal.handler.HandlerRegistry;
+import net.bluemind.agent.server.internal.handler.PluginLoader;
+import net.bluemind.agent.server.internal.handler.PluginLoader.ServerHandler;
 
 public class AgentServer extends Verticle {
 

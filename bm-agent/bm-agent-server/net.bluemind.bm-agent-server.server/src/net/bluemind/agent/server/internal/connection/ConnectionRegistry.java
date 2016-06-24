@@ -20,7 +20,7 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server.internal;
+package net.bluemind.agent.server.internal.connection;
 
 import java.util.HashMap;
 import java.util.Map;

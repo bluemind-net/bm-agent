@@ -33,7 +33,8 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
 import net.bluemind.agent.Connection;
-import net.bluemind.agent.client.internal.HandlerRegistry.AgentHandler;
+import net.bluemind.agent.client.internal.handler.HandlerRegistry;
+import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
 
 public class AgentClientVerticle extends Verticle implements Connection {
 	public static final String address_init = "agent.init";

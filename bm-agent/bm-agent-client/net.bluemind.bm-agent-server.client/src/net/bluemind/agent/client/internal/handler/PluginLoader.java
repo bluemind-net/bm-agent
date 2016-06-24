@@ -20,7 +20,7 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.client.internal;
+package net.bluemind.agent.client.internal.handler;
 
 import java.util.ArrayList;
 import java.util.List;

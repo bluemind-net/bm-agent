@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":net.bluemind.agent.server.AgentMessageHandler"/>
+                  <meta.attribute kind="java" basedOn=":net.bluemind.agent.server.AgentServerHandler"/>
                </appinfo>
             </annotation>
          </attribute>

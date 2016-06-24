@@ -20,13 +20,13 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server.internal;
+package net.bluemind.agent.client.internal.handler;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import net.bluemind.agent.server.AgentServerHandler;
+import net.bluemind.agent.client.AgentClientHandler;
 
 public class HandlerRegistry {
 
@@ -40,7 +40,7 @@ public class HandlerRegistry {
 		return Optional.ofNullable(handlers.get(command));
 	}
 
-	public void register(String command, AgentServerHandler handler, String info) {
+	public void register(String command, AgentClientHandler handler, String info) {
 		handlers.put(command, new AgentHandler(handler, info));
 	}
 
@@ -53,10 +53,10 @@ public class HandlerRegistry {
 	}
 
 	public class AgentHandler {
-		public final AgentServerHandler handler;
+		public final AgentClientHandler handler;
 		public final String info;
 
-		public AgentHandler(AgentServerHandler handler, String info) {
+		public AgentHandler(AgentClientHandler handler, String info) {
 			this.handler = handler;
 			this.info = info;
 		}

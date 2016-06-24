@@ -10,4 +10,6 @@ Require-Bundle: net.bluemind.lib.jackson,
  slf4j.api,
  io.vertx.platform,
  net.bluemind.lib.vertx;bundle-version="3.1.7178"
-Export-Package: net.bluemind.agent
+Export-Package: net.bluemind.agent,
+ net.bluemind.agent.client,
+ net.bluemind.agent.server

@@ -38,8 +38,10 @@ import org.vertx.java.platform.Verticle;
 
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
-import net.bluemind.agent.client.internal.HandlerRegistry.AgentHandler;
-import net.bluemind.agent.client.internal.PluginLoader.ClientHandler;
+import net.bluemind.agent.client.internal.handler.HandlerRegistry;
+import net.bluemind.agent.client.internal.handler.PluginLoader;
+import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
+import net.bluemind.agent.client.internal.handler.PluginLoader.ClientHandler;
 
 public class AgentClient extends Verticle {
 
