@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.bluemind</groupId>
-			<artifactId>net.bluemind.agent.p2.bm-agent-client</artifactId>
+			<artifactId>net.bluemind.p2.products.agent.client</artifactId>
 			<version>${project.version}</version>
 			<type>zip</type>
 		</dependency>
