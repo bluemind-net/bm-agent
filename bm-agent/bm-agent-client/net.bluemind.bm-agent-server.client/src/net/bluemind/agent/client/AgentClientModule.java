@@ -32,17 +32,18 @@ import org.vertx.java.core.Vertx;
 import org.vertx.java.platform.PlatformManager;
 import org.vertx.java.platform.impl.DefaultPlatformManagerFactory;
 
+import net.bluemind.agent.VertxHolder;
+
 public class AgentClientModule implements BundleActivator {
 
 	private static Logger logger = LoggerFactory.getLogger(AgentClientModule.class);
-	public static Vertx vertx;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Client");
 
 		PlatformManager pm = new DefaultPlatformManagerFactory().createPlatformManager();
-		AgentClientModule.vertx = pm.vertx();
+		VertxHolder.vertx = pm.vertx();
 		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClient", null, new URL[0], 1, null, null);
 		pm.deployWorkerVerticle(true, "net.bluemind.agent.client.internal.AgentClientVerticle", null, new URL[0], 10,
 				null, null);

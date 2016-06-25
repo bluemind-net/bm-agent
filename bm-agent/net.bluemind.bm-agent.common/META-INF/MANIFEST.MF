@@ -6,7 +6,8 @@ Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: www.blue-mind.net
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: net.bluemind.lib.jackson,
- slf4j.api
+ slf4j.api,
+ io.vertx.core;bundle-version="2.1.6"
 Export-Package: net.bluemind.agent,
  net.bluemind.agent.client,
  net.bluemind.agent.server

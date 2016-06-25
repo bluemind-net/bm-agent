@@ -35,7 +35,7 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 
 	Logger logger = LoggerFactory.getLogger(PortRedirectServerHandler.class);
 
-	HashMap<String, Handler> handlers = new HashMap<>();
+	HashMap<String, ConnectionHandler> handlers = new HashMap<>();
 
 	@Override
 	public void onMessage(String id, String command, byte[] data, Connection connection) {
@@ -49,13 +49,13 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		String clientId = obj.getString("client-id");
 		byte[] value = obj.getBinary("data");
 
-		Handler handler = null;
+		ConnectionHandler handler = null;
 		if (handlers.containsKey(clientId)) {
 			logger.info("handler for id {} is already connected", clientId);
 			handler = handlers.get(clientId);
 		} else {
 			logger.info("handler for id {} is not connected yet", clientId);
-			handler = new Handler(id, command, connection, clientId, serverHost, clientPort, serverDestPort);
+			handler = new ConnectionHandler(id, command, connection, clientId, serverHost, clientPort, serverDestPort);
 			try {
 				handler.connect();
 				logger.info("Connected to {}:{}", serverHost, serverDestPort);
