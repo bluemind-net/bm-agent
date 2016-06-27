@@ -40,7 +40,8 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 
 	@Override
 	public void onMessage(String id, String command, byte[] data, Connection connection) {
-		logger.info("Received a port redirect message from {}: {}", id, new String(data));
+		logger.info("Received a port redirect message from {}: {} bytes", id, data.length);
+		logger.debug("data: {}", id, new String(data));
 
 		JsonObject obj = new JsonObject(new String(data));
 
@@ -71,6 +72,8 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	}
 
 	public static class PortRedirectionConnection implements Connection {
+
+		Logger logger = LoggerFactory.getLogger(PortRedirectionConnection.class);
 
 		private final Connection connection;
 

@@ -22,6 +22,10 @@
  */
 package net.bluemind.agent.client.handler.redirect;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,8 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.client.AgentClientHandler;
+import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
 
 public class PortRedirectClientHandler implements AgentClientHandler {
 
@@ -54,29 +61,38 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 
 		logger.info("Initializing Port Redirections");
 
-		HostPortConfig portConfig = new HostPortConfig("google.de", 80, 8036);
-		Listener listener = new Listener(id, command, connection, portConfig);
-		localServers.put(portConfig.localPort, listener);
-		Runnable t = () -> {
-			try {
-				listener.start();
-			} catch (Exception e) {
-				logger.warn("Cannot start port redirection listener");
-			}
-		};
-		new Thread(t).start();
+		List<HostPortConfig> config = readConfig();
+
+		logger.info("Found {} port redirection configurations", config.size());
+
+		for (HostPortConfig hostPortConfig : config) {
+			logger.info("Starting up connection {}", hostPortConfig);
+			Listener listener = new Listener(id, command, connection, hostPortConfig);
+			localServers.put(hostPortConfig.localPort, listener);
+			Runnable t = () -> {
+				try {
+					listener.start();
+				} catch (Exception e) {
+					logger.warn("Cannot start port redirection listener");
+				}
+			};
+			new Thread(t).start();
+		}
 	}
 
-	public static class HostPortConfig {
-		public final String serverHost;
-		public final int remotePort;
-		public final int localPort;
+	private List<HostPortConfig> readConfig() {
+		String filepath = System.getProperty("bm-agent-port-config", "/etc/bm/agent/port-config");
 
-		public HostPortConfig(String serverHost, int remotePort, int localPort) {
-			this.serverHost = serverHost;
-			this.remotePort = remotePort;
-			this.localPort = localPort;
+		try {
+			String data = new String(Files.readAllBytes(new File(filepath).toPath()));
+			ObjectMapper mapper = new ObjectMapper();
+
+			return mapper.readValue(data,
+					mapper.getTypeFactory().constructCollectionType(List.class, HostPortConfig.class));
+		} catch (Exception e) {
+			logger.warn("Cannot load port-redirection config from {}", filepath, e);
 		}
+		return Collections.emptyList();
 	}
 
 }

@@ -75,7 +75,8 @@ public class ConnectionHandler {
 					socket.dataHandler(new Handler<Buffer>() {
 						public void handle(Buffer event) {
 							byte[] data = event.getBytes();
-							logger.info("Received data from server, redirecting to cloent: {}", new String(data));
+							logger.info("Received {} bytes from server, redirecting to client: {}", data.length);
+							logger.debug("data: {}", new String(data));
 							byte[] messageData = new JsonObject() //
 									.putNumber("client-port", clientPort) //
 									.putString("client-id", clientId) //
@@ -109,7 +110,6 @@ public class ConnectionHandler {
 	}
 
 	public void write(byte[] value) {
-		logger.info("Writing to socket {}", new String(value));
 		Buffer buffer = new Buffer(value);
 		socket.write(buffer);
 	}

@@ -36,7 +36,7 @@ import org.vertx.java.core.net.NetSocket;
 
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.VertxHolder;
-import net.bluemind.agent.client.handler.redirect.PortRedirectClientHandler.HostPortConfig;
+import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
 
 public class Listener {
 
@@ -72,7 +72,7 @@ public class Listener {
 	}
 
 	public void receive(String clientId, byte[] value) {
-		logger.info("Writing to client {}", clientId);
+		logger.debug("Writing to client {}:{}", clientId, new String(value));
 		serverHandlers.get(clientId).write(new Buffer(value));
 	}
 
@@ -108,6 +108,7 @@ public class Listener {
 				public void handle(Buffer buffer) {
 					byte[] data = buffer.getBytes();
 					logger.info("Received data from client, redirecting to server: {}", new String(data));
+					logger.debug("Data: {}", new String(data));
 					byte[] messageData = new JsonObject() //
 							.putString("server-host", listener.hostPortConfig.serverHost) //
 							.putNumber("server-dest-port", listener.hostPortConfig.remotePort) //
