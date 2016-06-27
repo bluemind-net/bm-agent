@@ -22,8 +22,8 @@
  */
 package net.bluemind.agent.client.handler.redirect;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +35,14 @@ import net.bluemind.agent.client.AgentClientHandler;
 public class PortRedirectClientHandler implements AgentClientHandler {
 
 	Logger logger = LoggerFactory.getLogger(PortRedirectClientHandler.class);
-	public final Map<Integer, Listener> localServers = new HashMap<>();
+	public static final Map<Integer, Listener> localServers = new ConcurrentHashMap<>();
 
 	@Override
 	public void onMessage(byte[] data) {
 
 		JsonObject obj = new JsonObject(new String(data));
 		String clientId = obj.getString("client-id");
-		String clientPort = obj.getString("client-port");
+		int clientPort = obj.getInteger("client-port");
 		byte[] value = obj.getBinary("data");
 
 		logger.info("Received data for from server for client port {}, id: {}", clientPort, clientId);
@@ -54,7 +54,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 
 		logger.info("Initializing Port Redirections");
 
-		HostPortConfig portConfig = new HostPortConfig("localhost", 8037, 8036);
+		HostPortConfig portConfig = new HostPortConfig("google.de", 80, 8036);
 		Listener listener = new Listener(id, command, connection, portConfig);
 		localServers.put(portConfig.localPort, listener);
 		Runnable t = () -> {

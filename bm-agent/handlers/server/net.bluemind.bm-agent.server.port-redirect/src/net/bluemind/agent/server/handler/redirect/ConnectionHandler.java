@@ -34,22 +34,8 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.net.NetClient;
 import org.vertx.java.core.net.NetSocket;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import net.bluemind.agent.Connection;
 import net.bluemind.agent.VertxHolder;
-import net.bluemind.agent.client.AgentClientHandler;
+import net.bluemind.agent.server.handler.redirect.PortRedirectServerHandler.PortRedirectionConnection;
 
 public class ConnectionHandler {
 
@@ -58,14 +44,14 @@ public class ConnectionHandler {
 	protected final int serverDestPort;
 	protected final String id;
 	protected final String command;
-	protected final Connection connection;
+	protected final PortRedirectionConnection connection;
 	protected final String serverHost;
 	NetSocket socket;
 
 	private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
 
-	public ConnectionHandler(String id, String command, Connection connection, String clientId, String serverHost, int clientPort,
-			int serverDestPort) {
+	public ConnectionHandler(String id, String command, PortRedirectionConnection connection, String clientId,
+			String serverHost, int clientPort, int serverDestPort) {
 		this.id = id;
 		this.command = command;
 		this.clientId = clientId;
@@ -86,7 +72,7 @@ public class ConnectionHandler {
 				if (asyncResult.succeeded()) {
 					logger.info("Connected to server {}:{}", serverHost, serverDestPort);
 					socket = asyncResult.result();
-					socket.dataHandler(new Handler<Buffer>(){
+					socket.dataHandler(new Handler<Buffer>() {
 						public void handle(Buffer event) {
 							byte[] data = event.getBytes();
 							logger.info("Received data from server, redirecting to cloent: {}", new String(data));
@@ -95,17 +81,35 @@ public class ConnectionHandler {
 									.putString("client-id", clientId) //
 									.putBinary("data", data).asObject().encode().getBytes();
 							connection.send(id, command, messageData);
-							
-						}});
+
+						}
+					});
+					socket.closeHandler(new Handler<Void>() {
+
+						@Override
+						public void handle(Void event) {
+							logger.info("Socket to {}:{} has been closed", serverHost, serverDestPort);
+							connection.remove(ConnectionHandler.this.clientId);
+						}
+					});
+					socket.exceptionHandler(new Handler<Throwable>() {
+
+						@Override
+						public void handle(Throwable event) {
+							logger.warn("Error while talking to {}:{}", serverHost, serverDestPort, event);
+						}
+					});
 				} else {
 					logger.warn("Cannot connect to server {}:{}", serverHost, serverDestPort, asyncResult.cause());
 				}
 				latch.countDown();
 			}
 		});
+		latch.await();
 	}
 
 	public void write(byte[] value) {
+		logger.info("Writing to socket {}", new String(value));
 		Buffer buffer = new Buffer(value);
 		socket.write(buffer);
 	}

@@ -22,27 +22,20 @@
  */
 package net.bluemind.agent.client.handler.redirect;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.Handler;
+import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.net.NetServer;
+import org.vertx.java.core.net.NetSocket;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.bluemind.agent.Connection;
+import net.bluemind.agent.VertxHolder;
 import net.bluemind.agent.client.handler.redirect.PortRedirectClientHandler.HostPortConfig;
 
 public class Listener {
@@ -60,80 +53,107 @@ public class Listener {
 		this.command = command;
 		this.connection = connection;
 		this.hostPortConfig = hostPortConfig;
-		serverHandlers = new HashMap<>();
+		serverHandlers = new ConcurrentHashMap<>();
 	}
 
 	public void start() throws Exception {
-		EventLoopGroup bossGroup = new NioEventLoopGroup();
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		try {
-			ServerBootstrap b = new ServerBootstrap();
-			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-					.childHandler(new ChannelInitializer<SocketChannel>() {
-						@Override
-						public void initChannel(SocketChannel ch) throws Exception {
-							String clientId = UUID.randomUUID().toString();
-							ServerHandler handler = new ServerHandler(Listener.this, clientId);
-							serverHandlers.put(clientId, handler);
-							ch.pipeline().addLast(handler);
-						}
-					}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 
-			ChannelFuture f = b.bind(hostPortConfig.localPort).sync();
+		NetServer createNetServer = VertxHolder.vertx.createNetServer();
+		createNetServer.connectHandler(new Handler<NetSocket>() {
 
-			f.channel().closeFuture().sync();
-		} finally {
-			workerGroup.shutdownGracefully();
-			bossGroup.shutdownGracefully();
-		}
+			@Override
+			public void handle(NetSocket netSocket) {
+				String clientId = UUID.randomUUID().toString();
+				ServerHandler serverHandler = new ServerHandler(clientId, netSocket, Listener.this);
+				serverHandlers.put(clientId, serverHandler);
+			}
+		});
+		createNetServer.listen(hostPortConfig.localPort);
 	}
 
-	public void receive(String clientId, byte[] data) {
-		serverHandlers.get(clientId).channelWrite(data);
-	};
+	public void receive(String clientId, byte[] value) {
+		logger.info("Writing to client {}", clientId);
+		serverHandlers.get(clientId).write(new Buffer(value));
+	}
 
-	public static class ServerHandler extends ChannelInboundHandlerAdapter {
-		private final Listener con;
+	public static class ServerHandler {
+
 		private final String clientId;
-		private ChannelHandlerContext ctx;
+		private final NetSocket netSocket;
+		private final Listener listener;
+		boolean stopped;
+		private Buffer buffer = new Buffer();
 
-		public ServerHandler(Listener con, String clientId) {
-			this.con = con;
+		public ServerHandler(String clientId, NetSocket netSocket, Listener listener) {
+			this.netSocket = netSocket;
+			this.listener = listener;
 			this.clientId = clientId;
+
+			setupHandlers();
 		}
 
-		@Override
-		public void channelActive(ChannelHandlerContext ctx) throws Exception {
-			super.channelActive(ctx);
-			this.ctx = ctx;
+		private void setupHandlers() {
+			netSocket.closeHandler(new Handler<Void>() {
+
+				@Override
+				public void handle(Void event) {
+					logger.info("Disconnecting from client {}", clientId);
+					listener.remove(clientId);
+				}
+
+			});
+			netSocket.dataHandler(new Handler<Buffer>() {
+
+				@Override
+				public void handle(Buffer buffer) {
+					byte[] data = buffer.getBytes();
+					logger.info("Received data from client, redirecting to server: {}", new String(data));
+					byte[] messageData = new JsonObject() //
+							.putString("server-host", listener.hostPortConfig.serverHost) //
+							.putNumber("server-dest-port", listener.hostPortConfig.remotePort) //
+							.putNumber("client-port", listener.hostPortConfig.localPort) //
+							.putString("client-id", clientId) //
+							.putBinary("data", data).asObject().encode().getBytes();
+					listener.connection.send(listener.id, listener.command, messageData);
+
+				}
+			});
+			netSocket.drainHandler(new Handler<Void>() {
+
+				@Override
+				public void handle(Void event) {
+					stopped = false;
+					tryWrite();
+				}
+			});
+			netSocket.exceptionHandler(new Handler<Throwable>() {
+
+				@Override
+				public void handle(Throwable event) {
+					logger.warn("Error occured while talking to client {}", clientId, event);
+				}
+			});
 		}
 
-		public void channelWrite(byte[] data) {
-			ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(data.length);
-			buffer.setBytes(0, data);
-			ctx.write(buffer);
+		protected void tryWrite() {
+			if (!netSocket.writeQueueFull()) {
+				netSocket.write(buffer);
+				buffer = new Buffer();
+			} else {
+				stopped = true;
+			}
+
 		}
 
-		@Override
-		public void channelRead(ChannelHandlerContext ctx, Object msg) {
-			ByteBuf buffer = (ByteBuf) msg;
-			byte[] data = new byte[buffer.readableBytes()];
-			buffer.readBytes(data);
-			logger.info("Received data from client, redirecting to server: {}", new String(data));
-			byte[] messageData = new JsonObject() //
-					.putString("server-host", con.hostPortConfig.serverHost) //
-					.putNumber("server-dest-port", con.hostPortConfig.remotePort) //
-					.putNumber("client-port", con.hostPortConfig.localPort) //
-					.putString("client-id", clientId) //
-					.putBinary("data", data).asObject().encode().getBytes();
-			con.connection.send(con.id, con.command, messageData);
+		public void write(Buffer data) {
+			buffer.appendBuffer(data);
+			tryWrite();
 		}
 
-		@Override
-		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-			ctx.close();
-			logger.error("An error occured while reading from channel", cause);
-		}
+	}
+
+	protected void remove(String clientId) {
+		serverHandlers.remove(clientId);
 	}
 
 }

@@ -22,7 +22,8 @@
  */
 package net.bluemind.agent.server.handler.redirect;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 
 	Logger logger = LoggerFactory.getLogger(PortRedirectServerHandler.class);
 
-	HashMap<String, ConnectionHandler> handlers = new HashMap<>();
+	public static Map<String, ConnectionHandler> handlers = new ConcurrentHashMap<>();
 
 	@Override
 	public void onMessage(String id, String command, byte[] data, Connection connection) {
@@ -55,7 +56,8 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 			handler = handlers.get(clientId);
 		} else {
 			logger.info("handler for id {} is not connected yet", clientId);
-			handler = new ConnectionHandler(id, command, connection, clientId, serverHost, clientPort, serverDestPort);
+			handler = new ConnectionHandler(id, command, new PortRedirectionConnection(connection), clientId,
+					serverHost, clientPort, serverDestPort);
 			try {
 				handler.connect();
 				logger.info("Connected to {}:{}", serverHost, serverDestPort);
@@ -66,6 +68,25 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		}
 
 		handler.write(value);
+	}
+
+	public static class PortRedirectionConnection implements Connection {
+
+		private final Connection connection;
+
+		public PortRedirectionConnection(Connection connection) {
+			this.connection = connection;
+		}
+
+		@Override
+		public void send(String id, String command, byte[] data) {
+			connection.send(id, command, data);
+		}
+
+		public void remove(String clientId) {
+			PortRedirectServerHandler.handlers.remove(clientId);
+		}
+
 	}
 
 }
