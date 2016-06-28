@@ -3,13 +3,13 @@
 
 # JDKs from lowest to biggest priority
 jdks="\
+/usr/lib/jvm/java-1.8.0-openjdk-amd64 \
+/usr/lib/jvm/jre-1.8.0-openjdk.x86_64 \
 /usr/lib/jvm/bm-jdk \
-/usr/lib/jvm/java-openjdk \
-/usr/lib/jvm/java-8-openjdk-amd64 \
 "
 
 # Default value
-ret=/usr/lib/jvm/java-6-sun
+ret=/usr/lib/jvm/bm-jdk
 
 for i in $jdks; do
     test -e $i/bin/java && ret=$i
@@ -17,4 +17,3 @@ done
 
 echo $ret
 exit 0
-

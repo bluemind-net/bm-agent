@@ -18,7 +18,11 @@ fi
 BM_SERVICE="BlueMind agent server"
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-export JAVA_HOME=`/usr/share/bm-agent-server/bm_java_home`
+if [ -e /usr/bin/bm_java_home ]; then
+    export JAVA_HOME=`/usr/bin/bm_java_home`
+else
+    export JAVA_HOME=`/usr/share/bm-agent-server/bm_java_home`
+fi
 PATH=$JAVA_HOME/bin:$PATH
 
 test -f $JAVA_HOME/bin/java || {
