@@ -1,0 +1,20 @@
+#!/bin/bash
+# Try to choose an approriate JDK for Blue Mind services
+
+# JDKs from lowest to biggest priority
+jdks="\
+/usr/lib/jvm/bm-jdk \
+/usr/lib/jvm/java-openjdk \
+/usr/lib/jvm/java-8-openjdk-amd64 \
+"
+
+# Default value
+ret=/usr/lib/jvm/java-6-sun
+
+for i in $jdks; do
+    test -e $i/bin/java && ret=$i
+done
+
+echo $ret
+exit 0
+
