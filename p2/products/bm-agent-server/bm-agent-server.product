@@ -3,13 +3,14 @@
 
 <product name="bluemind.agent.server" uid="agent.server" id="net.bluemind.bm-agent-server.server.bmagentserver" application="net.bluemind.bm-agent-server.server.agentServerLauncher" version="3.1.0.qualifier" useFeatures="false" includeLaunchers="true">
 
+
    <configIni use="default">
    </configIni>
 
    <launcherArgs>
       <programArgs>-consoleLog -debug
       </programArgs>
-      <vmArgs>-Dosgi.noShutdown=true -Duser.timezone=GMT -Djava.awt.headless=true -Xmx256m
+      <vmArgs>-Dosgi.noShutdown=true -Duser.timezone=GMT -Djava.awt.headless=true -Xmx256m -Xms256m
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -17,12 +18,14 @@
 
    <windowImages/>
 
+
    <launcher name="agent.server">
       <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
@@ -57,8 +60,10 @@
       <plugin id="org.eclipse.equinox.common"/>
       <plugin id="org.eclipse.equinox.preferences"/>
       <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.equinox.ds"/>
       <plugin id="org.eclipse.osgi"/>
       <plugin id="slf4j.api"/>
+      <plugin id="org.eclipse.update.configurator"/>
    </plugins>
 
    <configurations>
