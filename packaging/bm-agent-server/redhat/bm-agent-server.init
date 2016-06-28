@@ -1,0 +1,132 @@
+#!/bin/bash
+#
+### BEGIN INIT INFO
+# Provides: bm-agent-server
+# Required-Start: $syslog $network
+# Required-Stop: $syslog $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: BM agent server.
+# Description: init system for BlueMind agent server.
+### END INIT INFO
+
+[ -f /lib/init/vars.sh ] && source /lib/init/vars.sh
+if [ "$VERBOSE" == "yes" ]; then
+	set -x
+fi
+
+BM_SERVICE="BlueMind agent server"
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+if [ -e /usr/bin/bm_java_home ]; then
+    export JAVA_HOME=`/usr/bin/bm_java_home`
+else
+    export JAVA_HOME=`/usr/share/bm-agent-server/bm_java_home`
+fi
+PATH=$JAVA_HOME/bin:$PATH
+
+test -f $JAVA_HOME/bin/java || {
+    echo "JDK not found in JAVA_HOME: $JAVA_HOME"
+    exit 1
+}
+
+
+bmagentserver_pid=/var/run/bm-agent-server.pid
+bmagentserver_home=/usr/share/bm-agent-server
+bmagentserver_logs=/var/log/bm-agent-server/bm-agent-server.log
+jps=$JAVA_HOME/bin/jps
+
+bmagentserver_running() {
+    test -f ${bmagentserver_pid} || return 1
+    supposed_pid=`cat ${bmagentserver_pid}`
+
+    kill -0 ${supposed_pid} >/dev/null 2>&1
+    ret=$?
+
+    if [ ${ret} -ne 0 ]; then
+        rm -f ${bmagentserver_pid} > /dev/null 2>&1 || true
+    fi
+
+    return ${ret}
+}
+
+start_bmagentserver() {
+    bmagentserver_running && {
+	echo "${BM_SERVICE} Server already running."
+        return 0
+    }
+
+    ${bmagentserver_home}/bm-agent-server 0>/dev/null 1>/dev/null 2>/dev/null 3>/dev/null &
+    new_pid=$!
+    echo $new_pid > $bmagentserver_pid 
+    echo -n "Starting server ${BM_SERVICE} (PID: `cat ${bmagentserver_pid}`)"
+    bmagentserver_running
+    running=$?
+
+    if [ ${running} -eq 0 ]; then
+        echo ": done"
+    else
+        echo ": fail"
+    fi
+
+    return ${running}
+}
+
+stop_bmagentserver() {
+    bmagentserver_running || {
+	echo "${BM_SERVICE} Server not running."
+	return 0
+    }
+
+    if [ -f /sbin/start-stop-daemon ]; then
+        start-stop-daemon --stop --quiet --oknodo --pidfile ${bmagentserver_pid}
+    else
+        kill -TERM `cat ${bmagentserver_pid}`
+    fi
+
+    echo -n "Waiting for ${BM_SERVICE} Server shutdown."
+    count=0
+    while bmagentserver_running; do
+	echo -n "."
+	sleep 0.5
+	count=$((${count}+1))
+        if [ ${count} -gt 10 ]; then
+          kill -9 `cat ${bmagentserver_pid}` || true
+	  break
+        fi
+    done
+    rm -f ${bmagentserver_pid}
+    echo ""
+}
+
+status_bmagentserver() {
+    bmagentserver_running || {
+        echo "${BM_SERVICE} Server not running."
+        return 3
+    }
+
+   return 0
+}
+
+case "$1" in
+    start)
+        start_bmagentserver
+        ret=$?
+        ;;
+    
+    stop)
+        stop_bmagentserver
+        ret=$?
+        ;;
+    status)
+	    status_bmagentserver
+        ret=$?
+	;;
+    restart)
+        stop_bmagentserver
+        start_bmagentserver
+        ret=$?
+        ;;
+esac
+
+exit $ret
