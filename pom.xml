@@ -16,6 +16,7 @@
 
 	<modules>
 		<module>bm-agent</module>
+		<module>./global/pom.xml</module>
 	</modules>
 
 	<profiles>
