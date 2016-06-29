@@ -7,5 +7,5 @@ Standards-Version: 3.9.1
 Package: bm-agent-client
 Architecture: amd64
 Depends: bm-jdk | openjdk-8
-Description: BlueMind agent server
- BlueMind agent server
+Description: BlueMind agent client
+ BlueMind agent client
