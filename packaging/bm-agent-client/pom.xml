@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>bm-agent-client</artifactId>
-	<packaging>bm-service-extension</packaging>
+	<packaging>bm-service</packaging>
 	<properties>
 		<service.name>bm-agent-client</service.name>
 		<description>BlueMind Communication Client</description>
