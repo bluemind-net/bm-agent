@@ -24,16 +24,16 @@ package net.bluemind.agent;
 
 public class BmMessage {
 
-	private String id;
+	private String agentId;
 	private String command;
 	private byte[] data;
 
-	public String getId() {
-		return id;
+	public String getAgentId() {
+		return agentId;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
 	}
 
 	public String getCommand() {
@@ -54,7 +54,7 @@ public class BmMessage {
 
 	@Override
 	public String toString() {
-		return String.format("Id: %s\r\nCommand: %s", id, command);
+		return String.format("Id: %s\r\nCommand: %s", agentId, command);
 	}
 
 }

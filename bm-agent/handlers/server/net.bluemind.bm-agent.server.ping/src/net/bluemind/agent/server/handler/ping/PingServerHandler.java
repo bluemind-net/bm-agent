@@ -22,6 +22,9 @@
  */
 package net.bluemind.agent.server.handler.ping;
 
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +36,20 @@ public class PingServerHandler implements AgentServerHandler {
 	Logger logger = LoggerFactory.getLogger(PingServerHandler.class);
 
 	@Override
-	public void onMessage(String id, String command, byte[] data, Connection connection) {
-		logger.info("Received a ping message from {}: {}", id, new String(data));
+	public void onMessage(String agentId, String command, byte[] data, Connection connection) {
+		logger.info("Received a ping message from {}: {}", agentId, new String(data));
 		try {
-			connection.send(id, command, "pong".getBytes());
+			connection.send(command, "pong".getBytes());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void onInitialize(String agentId, String command, List<String> pathParams, Map<String, String> queryParameters,
+			Connection connection) {
+
 	}
 
 }

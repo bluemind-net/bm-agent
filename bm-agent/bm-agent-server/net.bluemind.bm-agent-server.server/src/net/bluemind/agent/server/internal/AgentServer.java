@@ -31,11 +31,16 @@ import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.http.ServerWebSocket;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
+import net.bluemind.agent.server.internal.RequestParser.Command;
 import net.bluemind.agent.server.internal.config.ConfigReader;
 import net.bluemind.agent.server.internal.config.ServerConfig;
 import net.bluemind.agent.server.internal.connection.ConnectionRegistry;
@@ -64,10 +69,14 @@ public class AgentServer extends Verticle {
 			logger.info("Connection to websocket established from client: {}",
 					ws.remoteAddress().getAddress().toString());
 			ws.dataHandler(data -> {
-				logger.info("Server thread for message: {}", Thread.currentThread().getId());
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
+		}).requestHandler(request -> {
+			Command command = RequestParser.parse(request);
+			logger.info("Handling command {}:{}", command.agentId, command.command);
+			request.response().end();
+			handleCommand(command);
 		}).listen(config.port, config.listenerAddress);
 
 		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
@@ -88,9 +97,8 @@ public class AgentServer extends Verticle {
 
 	}
 
-	private void reply(String command, String id, byte[] data, ServerWebSocket con) {
+	private void reply(String command, String agentId, byte[] data, ServerWebSocket con) {
 		BmMessage message = new BmMessage();
-		message.setId(id);
 		message.setCommand(command);
 		message.setData(data);
 		try {
@@ -107,17 +115,37 @@ public class AgentServer extends Verticle {
 			logger.info("Incoming Message: {}", message);
 
 			JsonObject obj = new JsonObject() //
-					.putString("id", message.getId()) //
+					.putString("agentId", message.getAgentId()) //
 					.putString("command", message.getCommand()) //
 					.putBinary("data", message.getData()) //
 					.asObject();
-			ConnectionRegistry.getInstance().register(message.getId(), ws);
+			ConnectionRegistry.getInstance().register(message.getAgentId(), ws);
 			vertx.eventBus().send(AgentServerVerticle.address, obj);
 
 		} catch (Exception e) {
 			logger.warn("Error while handling message", e);
 		}
 
+	}
+
+	private void handleCommand(Command command) {
+		JsonArray pathParameters = new JsonArray();
+		for (String param : command.pathParameters) {
+			pathParameters.add(param);
+		}
+
+		String writeValueAsString = null;
+		try {
+			writeValueAsString = new ObjectMapper().writeValueAsString(command.queryParameters);
+		} catch (JsonProcessingException e) {
+			logger.warn("Cannot process query parameters", e);
+		}
+		JsonObject obj = new JsonObject() //
+				.putString("agentId", command.agentId) //
+				.putString("command", command.command) //
+				.putString("queryParameters", writeValueAsString).putArray("pathParameters", pathParameters);
+
+		vertx.eventBus().send(AgentServerVerticle.address_init, obj);
 	}
 
 	private void registerHandlers() {

@@ -47,14 +47,16 @@ public class ClientConfig {
 
 	public String host;
 	public int port;
+	public String agentId;
 
 	public ClientConfig() {
 
 	}
 
-	public ClientConfig(String host, int port) {
+	public ClientConfig(String host, int port, String agentId) {
 		this.host = host;
 		this.port = port;
+		this.agentId = agentId;
 	}
 
 }

@@ -20,33 +20,23 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.client.handler.redirect.config;
+package net.bluemind.agent.server.handler.redirect.config;
 
-import java.io.File;
-import java.nio.file.Files;
+public class HostPortConfig {
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+	@Override
+	public String toString() {
+		return String.format("local port: %d, remote host: %s, remote port: %d", localPort, serverHost, remotePort);
+	}
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+	public final String serverHost;
+	public final int remotePort;
+	public final int localPort;
 
-public class ConfigReader {
-
-	private static final int PORT = 8086;
-	private static Logger logger = LoggerFactory.getLogger(ConfigReader.class);
-
-	public static HostPortConfig readConfig(String property, String defaultPath) {
-		String filepath = System.getProperty(property, defaultPath);
-
-		try {
-			String data = new String(Files.readAllBytes(new File(filepath).toPath()));
-			ObjectMapper mapper = new ObjectMapper();
-
-			return mapper.readValue(data, HostPortConfig.class);
-		} catch (Exception e) {
-			logger.warn("Cannot load config from {}, using defaults", filepath);
-		}
-		return new HostPortConfig("default", "localhost", PORT, PORT);
+	public HostPortConfig(String serverHost, int remotePort, int localPort) {
+		this.serverHost = serverHost;
+		this.remotePort = remotePort;
+		this.localPort = localPort;
 	}
 
 }

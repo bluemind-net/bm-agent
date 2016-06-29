@@ -20,7 +20,7 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.client.handler.redirect;
+package net.bluemind.agent.server.handler.redirect;
 
 import java.util.Map;
 import java.util.UUID;
@@ -36,20 +36,18 @@ import org.vertx.java.core.net.NetSocket;
 
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.VertxHolder;
-import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
+import net.bluemind.agent.server.handler.redirect.config.HostPortConfig;
 
 public class Listener {
 
 	protected static Logger logger = LoggerFactory.getLogger(Listener.class);
 
-	public final String id;
 	public final String command;
 	public final Connection connection;
 	public final HostPortConfig hostPortConfig;
 	public final Map<String, ServerHandler> serverHandlers;
 
-	public Listener(String id, String command, Connection connection, HostPortConfig hostPortConfig) {
-		this.id = id;
+	public Listener(String command, Connection connection, HostPortConfig hostPortConfig) {
 		this.command = command;
 		this.connection = connection;
 		this.hostPortConfig = hostPortConfig;
@@ -72,7 +70,7 @@ public class Listener {
 	}
 
 	public void receive(String clientId, byte[] value) {
-		logger.debug("Writing to client {}:{}", clientId, new String(value));
+		logger.debug("Writing to server {}:{}", clientId, new String(value));
 		serverHandlers.get(clientId).write(new Buffer(value));
 	}
 
@@ -97,7 +95,7 @@ public class Listener {
 
 				@Override
 				public void handle(Void event) {
-					logger.info("Disconnecting from client {}", clientId);
+					logger.info("Disconnecting from local client {}", clientId);
 					listener.remove(clientId);
 				}
 
@@ -107,7 +105,7 @@ public class Listener {
 				@Override
 				public void handle(Buffer buffer) {
 					byte[] data = buffer.getBytes();
-					logger.info("Received data from client, redirecting to server: {}", new String(data));
+					logger.info("Received data from local client, redirecting to remote server: {}", new String(data));
 					logger.debug("Data: {}", new String(data));
 					byte[] messageData = new JsonObject() //
 							.putString("server-host", listener.hostPortConfig.serverHost) //
@@ -115,7 +113,7 @@ public class Listener {
 							.putNumber("client-port", listener.hostPortConfig.localPort) //
 							.putString("client-id", clientId) //
 							.putBinary("data", data).asObject().encode().getBytes();
-					listener.connection.send(listener.id, listener.command, messageData);
+					listener.connection.send(listener.command, messageData);
 
 				}
 			});
@@ -131,7 +129,7 @@ public class Listener {
 
 				@Override
 				public void handle(Throwable event) {
-					logger.warn("Error occured while talking to client {}", clientId, event);
+					logger.warn("Error occured while talking to local client {}", clientId, event);
 				}
 			});
 		}

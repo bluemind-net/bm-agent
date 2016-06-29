@@ -24,7 +24,6 @@ package net.bluemind.agent.client.internal;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +50,7 @@ public class AgentClient extends Verticle {
 	private static final int WS_FRAMESIZE = 65536 * 4;
 	private WebSocket ws;
 	private final MessageParser parser;
+	private ClientConfig config;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
@@ -61,6 +61,7 @@ public class AgentClient extends Verticle {
 	@Override
 	public void start() {
 		logger.info("Starting BM Agent Client");
+		config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
 		connect();
 
 		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
@@ -68,19 +69,18 @@ public class AgentClient extends Verticle {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				String command = event.body().getString("command");
-				String id = event.body().getString("id");
 				byte[] data = event.body().getBinary("data");
 
-				logger.info("handling message to server {}, command: {}", id, command);
-				send(command, id, data);
+				logger.info("handling message to server {}, command: {}", config.agentId, command);
+				send(command, data);
 			}
 		});
 
 	}
 
-	private void send(String command, String id, byte[] data) {
+	private void send(String command, byte[] data) {
 		BmMessage message = new BmMessage();
-		message.setId(id);
+		message.setAgentId(config.agentId);
 		message.setCommand(command);
 		message.setData(data);
 		try {
@@ -92,7 +92,6 @@ public class AgentClient extends Verticle {
 	}
 
 	private void connect() {
-		ClientConfig config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
 		HttpClient client = vertx.createHttpClient() //
 				.setMaxWebSocketFrameSize(WS_FRAMESIZE) //
 				.setHost(config.host) //
@@ -129,10 +128,8 @@ public class AgentClient extends Verticle {
 		List<ClientHandler> plugins = PluginLoader.load();
 		plugins.forEach(plugin -> {
 			logger.info("Registering plugin {} for command {}", plugin.name, plugin.command);
-			String id = UUID.randomUUID().toString();
 			HandlerRegistry.getInstance().register(plugin.command, plugin.handler, plugin.name);
 			JsonObject obj = new JsonObject() //
-					.putString("id", id) //
 					.putString("command", plugin.command) //
 					.asObject();
 

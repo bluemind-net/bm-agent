@@ -24,6 +24,7 @@ package net.bluemind.agent.client.internal.config;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class ConfigReader {
 		} catch (Exception e) {
 			logger.warn("Cannot load config from {}, using defaults", filepath);
 		}
-		return new ClientConfig("localhost", PORT);
+		return new ClientConfig("localhost", PORT, UUID.randomUUID().toString());
 	}
 
 }

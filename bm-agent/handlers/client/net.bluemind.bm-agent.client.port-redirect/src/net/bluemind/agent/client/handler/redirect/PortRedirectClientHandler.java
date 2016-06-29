@@ -22,10 +22,6 @@
  */
 package net.bluemind.agent.client.handler.redirect;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,64 +29,78 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.client.AgentClientHandler;
-import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
 
 public class PortRedirectClientHandler implements AgentClientHandler {
 
 	Logger logger = LoggerFactory.getLogger(PortRedirectClientHandler.class);
-	public static final Map<Integer, Listener> localServers = new ConcurrentHashMap<>();
+	public static Map<String, ConnectionHandler> handlers = new ConcurrentHashMap<>();
+	private PortRedirectionConnection connection;
 
 	@Override
 	public void onMessage(byte[] data) {
 
+		logger.info("Received a port redirect message containing {} bytes", data.length);
+		logger.debug("data: {}", new String(data));
+
 		JsonObject obj = new JsonObject(new String(data));
-		String clientId = obj.getString("client-id");
+
+		String serverHost = obj.getString("server-host");
+		int serverDestPort = obj.getInteger("server-dest-port");
 		int clientPort = obj.getInteger("client-port");
+		String clientId = obj.getString("client-id");
 		byte[] value = obj.getBinary("data");
 
-		logger.info("Received data for from server for client port {}, id: {}", clientPort, clientId);
-		localServers.get(clientPort).receive(clientId, value);
+		ConnectionHandler handler = null;
+		if (handlers.containsKey(clientId)) {
+			logger.info("handler for id {} is already connected", clientId);
+			handler = handlers.get(clientId);
+		} else {
+			logger.info("handler for id {} is not connected yet", clientId);
+			handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort);
+			try {
+				handler.connect();
+				logger.info("Connected to {}:{}", serverHost, serverDestPort);
+			} catch (Exception e) {
+				logger.warn("Cannot connect to remote server", e);
+			}
+			handlers.put(clientId, handler);
+		}
+
+		handler.write(value);
+
 	}
 
 	@Override
-	public void onInitialize(String id, String command, Connection connection) {
+	public void onInitialize(String command, Connection connection) {
+		this.connection = new PortRedirectionConnection(connection, command);
+	}
 
-		logger.info("Initializing Port Redirections");
+	public static class PortRedirectionConnection implements Connection {
 
-		List<HostPortConfig> config = readConfig();
+		Logger logger = LoggerFactory.getLogger(PortRedirectionConnection.class);
 
-		logger.info("Found {} port redirection configurations", config.size());
+		private final Connection connection;
+		private final String command;
 
-		for (HostPortConfig hostPortConfig : config) {
-			logger.info("Starting up connection {}", hostPortConfig);
-			Listener listener = new Listener(id, command, connection, hostPortConfig);
-			localServers.put(hostPortConfig.localPort, listener);
-			try {
-				listener.start();
-			} catch (Exception e) {
-				logger.warn("Cannot start port redirection listener");
-			}
+		public PortRedirectionConnection(Connection connection, String command) {
+			this.connection = connection;
+			this.command = command;
+		}
+
+		public void send(byte[] data) {
+			connection.send(this.command, data);
+		}
+
+		@Override
+		public void send(String command, byte[] data) {
+			connection.send(command, data);
+		}
+
+		public void remove(String clientId) {
+			PortRedirectClientHandler.handlers.remove(clientId);
 		}
 
 	}
-
-	private List<HostPortConfig> readConfig() {
-		String filepath = System.getProperty("bm-agent-redirect-config", "/etc/bm/agent/redirect-config.json");
-
-		try {
-			String data = new String(Files.readAllBytes(new File(filepath).toPath()));
-			ObjectMapper mapper = new ObjectMapper();
-
-			return mapper.readValue(data,
-					mapper.getTypeFactory().constructCollectionType(List.class, HostPortConfig.class));
-		} catch (Exception e) {
-			logger.warn("Cannot load port-redirection config from {}", filepath, e);
-		}
-		return Collections.emptyList();
-	}
-
 }

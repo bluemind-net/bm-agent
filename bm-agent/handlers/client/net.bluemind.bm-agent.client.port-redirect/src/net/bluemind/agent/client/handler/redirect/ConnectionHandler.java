@@ -20,7 +20,7 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server.handler.redirect;
+package net.bluemind.agent.client.handler.redirect;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -35,25 +35,21 @@ import org.vertx.java.core.net.NetClient;
 import org.vertx.java.core.net.NetSocket;
 
 import net.bluemind.agent.VertxHolder;
-import net.bluemind.agent.server.handler.redirect.PortRedirectServerHandler.PortRedirectionConnection;
+import net.bluemind.agent.client.handler.redirect.PortRedirectClientHandler.PortRedirectionConnection;
 
 public class ConnectionHandler {
 
 	protected final String clientId;
 	protected final int clientPort;
 	protected final int serverDestPort;
-	protected final String id;
-	protected final String command;
 	protected final PortRedirectionConnection connection;
 	protected final String serverHost;
 	NetSocket socket;
 
 	private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
 
-	public ConnectionHandler(String id, String command, PortRedirectionConnection connection, String clientId,
-			String serverHost, int clientPort, int serverDestPort) {
-		this.id = id;
-		this.command = command;
+	public ConnectionHandler(PortRedirectionConnection connection, String clientId, String serverHost, int clientPort,
+			int serverDestPort) {
 		this.clientId = clientId;
 		this.clientPort = clientPort;
 		this.serverDestPort = serverDestPort;
@@ -81,7 +77,7 @@ public class ConnectionHandler {
 									.putNumber("client-port", clientPort) //
 									.putString("client-id", clientId) //
 									.putBinary("data", data).asObject().encode().getBytes();
-							connection.send(id, command, messageData);
+							connection.send(messageData);
 
 						}
 					});

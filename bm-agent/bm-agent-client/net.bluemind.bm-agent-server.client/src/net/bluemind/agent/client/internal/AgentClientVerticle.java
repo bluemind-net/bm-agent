@@ -53,11 +53,10 @@ public class AgentClientVerticle extends Verticle implements Connection {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				String command = event.body().getString("command");
-				String id = event.body().getString("id");
 				Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 				handler.ifPresent(h -> {
 					logger.info("Found handler {} for command {}", h.info, command);
-					h.handler.onInitialize(id, command, AgentClientVerticle.this);
+					h.handler.onInitialize(command, AgentClientVerticle.this);
 				});
 
 			}
@@ -81,9 +80,8 @@ public class AgentClientVerticle extends Verticle implements Connection {
 	}
 
 	@Override
-	public void send(String id, String command, byte[] data) {
+	public void send(String command, byte[] data) {
 		JsonObject obj = new JsonObject() //
-				.putString("id", id) //
 				.putString("command", command) //
 				.putBinary("data", data) //
 				.asObject();

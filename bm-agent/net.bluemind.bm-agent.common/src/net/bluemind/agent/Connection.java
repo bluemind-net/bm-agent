@@ -24,6 +24,6 @@ package net.bluemind.agent;
 
 public interface Connection {
 
-	public void send(String id, String command, byte[] data);
+	public void send(String command, byte[] data);
 
 }

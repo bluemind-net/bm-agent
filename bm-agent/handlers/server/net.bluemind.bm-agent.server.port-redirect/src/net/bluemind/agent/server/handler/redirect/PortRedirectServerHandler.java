@@ -22,6 +22,7 @@
  */
 package net.bluemind.agent.server.handler.redirect;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,65 +32,43 @@ import org.vertx.java.core.json.JsonObject;
 
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.server.AgentServerHandler;
+import net.bluemind.agent.server.handler.redirect.config.HostPortConfig;
 
 public class PortRedirectServerHandler implements AgentServerHandler {
 
 	Logger logger = LoggerFactory.getLogger(PortRedirectServerHandler.class);
 
-	public static Map<String, ConnectionHandler> handlers = new ConcurrentHashMap<>();
+	public static final Map<Integer, Listener> localServers = new ConcurrentHashMap<>();
 
 	@Override
-	public void onMessage(String id, String command, byte[] data, Connection connection) {
-		logger.info("Received a port redirect message from {}: {} bytes", id, data.length);
-		logger.debug("data: {}", id, new String(data));
-
+	public void onMessage(String agentId, String command, byte[] data, Connection connection) {
 		JsonObject obj = new JsonObject(new String(data));
-
-		String serverHost = obj.getString("server-host");
-		int serverDestPort = obj.getInteger("server-dest-port");
-		int clientPort = obj.getInteger("client-port");
 		String clientId = obj.getString("client-id");
+		int clientPort = obj.getInteger("client-port");
 		byte[] value = obj.getBinary("data");
 
-		ConnectionHandler handler = null;
-		if (handlers.containsKey(clientId)) {
-			logger.info("handler for id {} is already connected", clientId);
-			handler = handlers.get(clientId);
-		} else {
-			logger.info("handler for id {} is not connected yet", clientId);
-			handler = new ConnectionHandler(id, command, new PortRedirectionConnection(connection), clientId,
-					serverHost, clientPort, serverDestPort);
-			try {
-				handler.connect();
-				logger.info("Connected to {}:{}", serverHost, serverDestPort);
-			} catch (Exception e) {
-				logger.warn("Cannot connect to remote server", e);
-			}
-			handlers.put(clientId, handler);
-		}
+		logger.info("Received data for from server for client port {}, id: {}", clientPort, clientId);
+		localServers.get(clientPort).receive(clientId, value);
 
-		handler.write(value);
 	}
 
-	public static class PortRedirectionConnection implements Connection {
+	@Override
+	public void onInitialize(String agentId, String command, List<String> pathParams,
+			Map<String, String> queryParameters, Connection connection) {
+		logger.info("Initializing Port Redirection");
 
-		Logger logger = LoggerFactory.getLogger(PortRedirectionConnection.class);
+		String host = queryParameters.get("host");
+		int port = Integer.parseInt(queryParameters.get("port"));
+		int localPort = Integer.parseInt(queryParameters.get("localPort"));
+		HostPortConfig hostPortConfig = new HostPortConfig(host, port, localPort);
 
-		private final Connection connection;
-
-		public PortRedirectionConnection(Connection connection) {
-			this.connection = connection;
+		Listener listener = new Listener(command, connection, hostPortConfig);
+		localServers.put(hostPortConfig.localPort, listener);
+		try {
+			listener.start();
+		} catch (Exception e) {
+			logger.warn("Cannot start port redirection listener");
 		}
-
-		@Override
-		public void send(String id, String command, byte[] data) {
-			connection.send(id, command, data);
-		}
-
-		public void remove(String clientId) {
-			PortRedirectServerHandler.handlers.remove(clientId);
-		}
-
 	}
 
 }
