@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.client.AgentClientHandler;
-import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
+import net.bluemind.agent.config.HostPortConfig;
 
 public class PortRedirectClientHandler implements AgentClientHandler {
 
@@ -69,19 +69,17 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 			logger.info("Starting up connection {}", hostPortConfig);
 			Listener listener = new Listener(id, command, connection, hostPortConfig);
 			localServers.put(hostPortConfig.localPort, listener);
-			Runnable t = () -> {
-				try {
-					listener.start();
-				} catch (Exception e) {
-					logger.warn("Cannot start port redirection listener");
-				}
-			};
-			new Thread(t).start();
+			try {
+				listener.start();
+			} catch (Exception e) {
+				logger.warn("Cannot start port redirection listener");
+			}
 		}
+
 	}
 
 	private List<HostPortConfig> readConfig() {
-		String filepath = System.getProperty("bm-agent-port-config", "/etc/bm/agent/port-config");
+		String filepath = System.getProperty("bm-agent-redirect-config", "/etc/bm/agent/redirect-config.json");
 
 		try {
 			String data = new String(Files.readAllBytes(new File(filepath).toPath()));

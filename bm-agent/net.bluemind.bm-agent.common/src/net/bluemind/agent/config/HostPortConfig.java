@@ -20,7 +20,7 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.client.handler.redirect.config;
+package net.bluemind.agent.config;
 
 public class HostPortConfig {
 

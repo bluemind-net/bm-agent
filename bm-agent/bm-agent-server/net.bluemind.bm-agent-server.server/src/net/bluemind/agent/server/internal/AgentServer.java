@@ -36,6 +36,8 @@ import org.vertx.java.platform.Verticle;
 
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
+import net.bluemind.agent.config.ConfigReader;
+import net.bluemind.agent.config.HostPortConfig;
 import net.bluemind.agent.server.internal.connection.ConnectionRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
 import net.bluemind.agent.server.internal.handler.PluginLoader;
@@ -44,18 +46,19 @@ import net.bluemind.agent.server.internal.handler.PluginLoader.ServerHandler;
 public class AgentServer extends Verticle {
 
 	public static final String address = "agent.reply";
-
-	private static final int PORT = 8086;
 	private MessageParser parser;
+	private static final int WS_FRAMESIZE = 65536 * 4;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentServer.class);
 
 	@Override
 	public void start() {
-		logger.info("Starting BM Agent Server on port {}", PORT);
+		HostPortConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
+		logger.info("Starting BM Agent Server on port {}", config.localPort);
 		this.parser = new MessageParser();
 		registerHandlers();
-		HttpServer server = vertx.createHttpServer();
+		HttpServer server = vertx.createHttpServer() //
+				.setMaxWebSocketFrameSize(WS_FRAMESIZE);
 
 		server.websocketHandler(ws -> {
 			logger.info("Connection to websocket established from client: {}",
@@ -65,7 +68,7 @@ public class AgentServer extends Verticle {
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
-		}).listen(PORT, "localhost");
+		}).listen(config.localPort, config.serverHost);
 
 		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
 
