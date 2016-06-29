@@ -38,12 +38,12 @@ import org.vertx.java.platform.Verticle;
 
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
+import net.bluemind.agent.client.internal.config.ClientConfig;
+import net.bluemind.agent.client.internal.config.ConfigReader;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
 import net.bluemind.agent.client.internal.handler.PluginLoader;
 import net.bluemind.agent.client.internal.handler.PluginLoader.ClientHandler;
-import net.bluemind.agent.config.ConfigReader;
-import net.bluemind.agent.config.HostPortConfig;
 
 public class AgentClient extends Verticle {
 
@@ -92,11 +92,11 @@ public class AgentClient extends Verticle {
 	}
 
 	private void connect() {
-		HostPortConfig config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
+		ClientConfig config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
 		HttpClient client = vertx.createHttpClient() //
 				.setMaxWebSocketFrameSize(WS_FRAMESIZE) //
-				.setHost(config.serverHost) //
-				.setPort(config.localPort);
+				.setHost(config.host) //
+				.setPort(config.port);
 
 		client.connectWebsocket("/", (ws -> {
 			logger.info("Connected to websocket");

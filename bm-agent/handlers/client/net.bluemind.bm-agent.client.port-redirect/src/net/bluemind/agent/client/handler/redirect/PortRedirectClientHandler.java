@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.client.AgentClientHandler;
-import net.bluemind.agent.config.HostPortConfig;
+import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
 
 public class PortRedirectClientHandler implements AgentClientHandler {
 

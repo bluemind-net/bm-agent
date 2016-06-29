@@ -36,8 +36,8 @@ import org.vertx.java.platform.Verticle;
 
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
-import net.bluemind.agent.config.ConfigReader;
-import net.bluemind.agent.config.HostPortConfig;
+import net.bluemind.agent.server.internal.config.ConfigReader;
+import net.bluemind.agent.server.internal.config.ServerConfig;
 import net.bluemind.agent.server.internal.connection.ConnectionRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
 import net.bluemind.agent.server.internal.handler.PluginLoader;
@@ -53,8 +53,8 @@ public class AgentServer extends Verticle {
 
 	@Override
 	public void start() {
-		HostPortConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
-		logger.info("Starting BM Agent Server on port {}", config.localPort);
+		ServerConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
+		logger.info("Starting BM Agent Server on port {}", config.port);
 		this.parser = new MessageParser();
 		registerHandlers();
 		HttpServer server = vertx.createHttpServer() //
@@ -68,7 +68,7 @@ public class AgentServer extends Verticle {
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
-		}).listen(config.localPort, config.serverHost);
+		}).listen(config.port, config.listenerAddress);
 
 		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
 

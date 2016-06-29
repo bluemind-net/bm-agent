@@ -36,7 +36,7 @@ import org.vertx.java.core.net.NetSocket;
 
 import net.bluemind.agent.Connection;
 import net.bluemind.agent.VertxHolder;
-import net.bluemind.agent.config.HostPortConfig;
+import net.bluemind.agent.client.handler.redirect.config.HostPortConfig;
 
 public class Listener {
 

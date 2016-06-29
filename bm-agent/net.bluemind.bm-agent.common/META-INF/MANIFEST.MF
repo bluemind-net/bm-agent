@@ -10,5 +10,4 @@ Require-Bundle: net.bluemind.lib.jackson,
  io.vertx.core;bundle-version="2.1.6"
 Export-Package: net.bluemind.agent,
  net.bluemind.agent.client,
- net.bluemind.agent.config,
  net.bluemind.agent.server

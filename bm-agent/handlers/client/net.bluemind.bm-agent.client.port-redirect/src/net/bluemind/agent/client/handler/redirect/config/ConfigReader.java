@@ -20,7 +20,7 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.config;
+package net.bluemind.agent.client.handler.redirect.config;
 
 import java.io.File;
 import java.nio.file.Files;

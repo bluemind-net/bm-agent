@@ -11,5 +11,7 @@ Require-Bundle: org.eclipse.osgi,
  io.netty;bundle-version="4.0.33",
  net.bluemind.bm-agent.common,
  org.eclipse.core.runtime,
- io.vertx.platform
+ io.vertx.platform,
+ com.fasterxml.jackson.core.jackson-databind,
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.4.1"
 Export-Package: net.bluemind.agent.client
