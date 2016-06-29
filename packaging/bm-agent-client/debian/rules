@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+# Do not generate crappy dependencies for unused libs
+DEB_DH_SHLIBDEPS_ARGS_bm-agent-client := "-Xlib"
+
+DEB_UPDATE_RCD_PARAMS_bm-agent-client := "defaults 62 01"
+
+build:
+
+install/bm-agent-client::
+	cp -rf ${CURDIR}/ROOT/* ${CURDIR}/debian/bm-agent-client
+	chmod +x ${CURDIR}/debian/bm-agent-client/usr/share/bm-agent-client/bm_java_home

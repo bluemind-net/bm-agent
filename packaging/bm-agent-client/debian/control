@@ -1,0 +1,11 @@
+Source: bluemind
+Section: net
+Priority: optional
+Maintainer: Blue Mind Team <team@blue-mind.net>
+Standards-Version: 3.9.1
+
+Package: bm-agent-client
+Architecture: amd64
+Depends: bm-jdk | openjdk-8
+Description: BlueMind agent server
+ BlueMind agent server
