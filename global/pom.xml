@@ -29,6 +29,11 @@
 			<url>http://forge.blue-mind.net/staging/p2/dependencies/163/</url>
 		</repository>
 		<repository>
+			<id>bluemind-plugins</id>
+			<layout>p2</layout>
+			<url>http://forge.blue-mind.net/staging/p2/bluemind/</url>
+		</repository>
+		<repository>
 			<id>tigase</id>
 			<url>http://build.tigase.org/maven</url>
 
