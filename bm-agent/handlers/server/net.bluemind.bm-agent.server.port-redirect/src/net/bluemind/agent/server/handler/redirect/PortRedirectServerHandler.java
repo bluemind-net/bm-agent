@@ -62,7 +62,7 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		int localPort = Integer.parseInt(queryParameters.get("localPort"));
 		HostPortConfig hostPortConfig = new HostPortConfig(host, port, localPort);
 
-		Listener listener = new Listener(command, connection, hostPortConfig);
+		Listener listener = new Listener(agentId, command, connection, hostPortConfig);
 		localServers.put(hostPortConfig.localPort, listener);
 		try {
 			listener.start();

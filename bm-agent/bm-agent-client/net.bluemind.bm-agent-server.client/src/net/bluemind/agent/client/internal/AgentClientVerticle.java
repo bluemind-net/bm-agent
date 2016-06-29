@@ -80,7 +80,7 @@ public class AgentClientVerticle extends Verticle implements Connection {
 	}
 
 	@Override
-	public void send(String command, byte[] data) {
+	public void send(String agentId, String command, byte[] data) {
 		JsonObject obj = new JsonObject() //
 				.putString("command", command) //
 				.putBinary("data", data) //

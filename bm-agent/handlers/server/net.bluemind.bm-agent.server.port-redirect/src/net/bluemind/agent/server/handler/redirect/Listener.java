@@ -42,12 +42,14 @@ public class Listener {
 
 	protected static Logger logger = LoggerFactory.getLogger(Listener.class);
 
+	public final String agentId;
 	public final String command;
 	public final Connection connection;
 	public final HostPortConfig hostPortConfig;
 	public final Map<String, ServerHandler> serverHandlers;
 
-	public Listener(String command, Connection connection, HostPortConfig hostPortConfig) {
+	public Listener(String agentId, String command, Connection connection, HostPortConfig hostPortConfig) {
+		this.agentId = agentId;
 		this.command = command;
 		this.connection = connection;
 		this.hostPortConfig = hostPortConfig;
@@ -70,7 +72,7 @@ public class Listener {
 	}
 
 	public void receive(String clientId, byte[] value) {
-		logger.debug("Writing to server {}:{}", clientId, new String(value));
+		logger.info("Writing to server {}:{}", clientId, new String(value));
 		serverHandlers.get(clientId).write(new Buffer(value));
 	}
 
@@ -113,7 +115,7 @@ public class Listener {
 							.putNumber("client-port", listener.hostPortConfig.localPort) //
 							.putString("client-id", clientId) //
 							.putBinary("data", data).asObject().encode().getBytes();
-					listener.connection.send(listener.command, messageData);
+					listener.connection.send(listener.agentId, listener.command, messageData);
 
 				}
 			});

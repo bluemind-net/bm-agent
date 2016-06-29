@@ -52,4 +52,13 @@ public class ConnectionRegistry {
 		return Holder.INSTANCE;
 	}
 
+	public String list() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("Connections: %d\r\n", connections.size()));
+		for (String agent : connections.keySet()) {
+			sb.append(String.format("Connection: %s\r\n", agent));	
+		}
+		return sb.toString();
+	}	
+
 }

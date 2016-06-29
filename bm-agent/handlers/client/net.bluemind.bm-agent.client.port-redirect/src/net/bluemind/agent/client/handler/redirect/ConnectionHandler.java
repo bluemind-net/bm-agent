@@ -59,8 +59,9 @@ public class ConnectionHandler {
 
 	public void connect() throws Exception {
 		final CountDownLatch latch = new CountDownLatch(1);
-		Vertx vertx = VertxHolder.vertx;
 
+		Runnable r = () -> {
+		Vertx vertx = VertxHolder.vertx;
 		NetClient client = vertx.createNetClient();
 
 		client.connect(serverDestPort, serverHost, new Handler<AsyncResult<NetSocket>>() {
@@ -101,7 +102,8 @@ public class ConnectionHandler {
 				}
 				latch.countDown();
 			}
-		});
+		});};
+		new Thread(r).start();
 		latch.await();
 	}
 

@@ -42,7 +42,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 	public void onMessage(byte[] data) {
 
 		logger.info("Received a port redirect message containing {} bytes", data.length);
-		logger.debug("data: {}", new String(data));
+		logger.info("data: {}", new String(data));
 
 		JsonObject obj = new JsonObject(new String(data));
 
@@ -90,12 +90,12 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 		}
 
 		public void send(byte[] data) {
-			connection.send(this.command, data);
+			send(null, this.command, data);
 		}
 
 		@Override
-		public void send(String command, byte[] data) {
-			connection.send(command, data);
+		public void send(String agentId, String command, byte[] data) {
+			connection.send(agentId, command, data);
 		}
 
 		public void remove(String clientId) {

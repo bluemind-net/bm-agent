@@ -39,7 +39,7 @@ public class PingServerHandler implements AgentServerHandler {
 	public void onMessage(String agentId, String command, byte[] data, Connection connection) {
 		logger.info("Received a ping message from {}: {}", agentId, new String(data));
 		try {
-			connection.send(command, "pong".getBytes());
+			connection.send(agentId, command, "pong".getBytes());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

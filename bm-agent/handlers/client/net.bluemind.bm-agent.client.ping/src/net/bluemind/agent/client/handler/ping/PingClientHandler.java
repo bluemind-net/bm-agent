@@ -41,7 +41,7 @@ public class PingClientHandler implements AgentClientHandler {
 	public void onInitialize(String command, Connection connection) {
 		logger.info("Pinging server");
 		try {
-			connection.send(command, "ping".getBytes());
+			connection.send(null, command, "ping".getBytes());
 		} catch (Exception e) {
 			logger.warn("Cannot ping server", e);
 		}

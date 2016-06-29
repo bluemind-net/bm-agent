@@ -84,12 +84,15 @@ public class AgentServer extends Verticle {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				String command = event.body().getString("command");
-				String id = event.body().getString("id");
+				String agentId = event.body().getString("agentId");
 				byte[] data = event.body().getBinary("data");
 
-				logger.info("handling reply to client {}, command: {}", id, command);
-				ConnectionRegistry.getInstance().get(id).ifPresent(con -> {
-					reply(command, id, data, con);
+				logger.info("handling reply to client {}, command: {}", agentId, command);
+				logger.info("{}", new String(data));
+				logger.info("{}", ConnectionRegistry.getInstance().list());
+				ConnectionRegistry.getInstance().get(agentId).ifPresent(con -> {
+					logger.info("Got a connection.... sending");
+					reply(command, agentId, data, con);
 				});
 			}
 
@@ -105,7 +108,7 @@ public class AgentServer extends Verticle {
 			Buffer buffer = new Buffer(parser.write(message));
 			con.write(buffer);
 		} catch (Exception e) {
-			logger.warn("Cannot send reply to client", e);
+			logger.warn("Cannot send reply to client {}", agentId, e);
 		}
 	}
 
