@@ -1,0 +1,7 @@
+### BEGIN INIT INFO
+# Provides: bm-agent-client
+# Required-Start: $syslog $network
+# Required-Stop: $syslog $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+### END INIT INFO
