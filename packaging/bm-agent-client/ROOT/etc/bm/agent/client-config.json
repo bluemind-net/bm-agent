@@ -1,0 +1,5 @@
+{
+	"agentId" : "customer-name",
+	"host" : "localhost",
+	"port" : 8086
+}
