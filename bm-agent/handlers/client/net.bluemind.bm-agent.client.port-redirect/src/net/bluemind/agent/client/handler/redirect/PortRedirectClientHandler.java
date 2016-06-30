@@ -56,6 +56,9 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 		if (handlers.containsKey(clientId)) {
 			logger.info("handler for id {} is already connected", clientId);
 			handler = handlers.get(clientId);
+			if (new String(value).equals("ack/end")) {
+				handler.disconnect();
+			}
 		} else {
 			logger.info("handler for id {} is not connected yet", clientId);
 			handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort);

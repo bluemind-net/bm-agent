@@ -104,6 +104,8 @@ public class Listener {
 				@Override
 				public void handle(Void event) {
 					logger.info("Disconnecting from local client {}", clientId);
+					byte[] messageData = createMessage("ack/end".getBytes());
+					listener.connection.send(listener.agentId, listener.command, messageData);
 					listener.remove(clientId);
 				}
 
@@ -118,14 +120,6 @@ public class Listener {
 					logger.trace("data: {}", new String(data));
 					byte[] messageData = createMessage(data);
 					listener.connection.send(listener.agentId, listener.command, messageData);
-				}
-			});
-			netSocket.drainHandler(new Handler<Void>() {
-
-				@Override
-				public void handle(Void event) {
-					stopped = false;
-					tryWrite();
 				}
 			});
 			netSocket.exceptionHandler(new Handler<Throwable>() {
@@ -148,13 +142,20 @@ public class Listener {
 		}
 
 		protected void tryWrite() {
-			if (!netSocket.writeQueueFull()) {
+			if (!stopped) {
 				netSocket.write(readBuffer);
 				readBuffer = new Buffer();
-			} else {
-				stopped = true;
-			}
+				if (netSocket.writeQueueFull()) {
+					stopped = true;
+					netSocket.drainHandler(new Handler<Void>() {
 
+						@Override
+						public void handle(Void event) {
+							stopped = false;
+						}
+					});
+				}
+			}
 		}
 
 		public void write(Buffer data) {

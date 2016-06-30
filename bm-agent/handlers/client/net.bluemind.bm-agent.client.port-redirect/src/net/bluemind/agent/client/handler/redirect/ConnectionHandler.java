@@ -114,4 +114,9 @@ public class ConnectionHandler {
 		socket.write(buffer);
 	}
 
+	public void disconnect() {
+		socket.close();
+		connection.remove(this.clientId);
+	}
+
 }
