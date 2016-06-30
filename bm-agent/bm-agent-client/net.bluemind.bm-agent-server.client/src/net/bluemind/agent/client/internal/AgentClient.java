@@ -112,6 +112,7 @@ public class AgentClient extends Verticle {
 	private void handleMessage(WebSocket ws, String value) {
 		try {
 			BmMessage message = parser.read(value);
+			message.setAgentId(config.agentId);
 			logger.info("Incoming Message: {}", message);
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(message.getCommand());
 			handler.ifPresent(h -> {

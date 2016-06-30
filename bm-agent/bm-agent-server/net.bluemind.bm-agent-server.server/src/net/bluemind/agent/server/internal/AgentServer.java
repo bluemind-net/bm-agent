@@ -23,6 +23,7 @@
 package net.bluemind.agent.server.internal;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,12 +89,13 @@ public class AgentServer extends Verticle {
 				byte[] data = event.body().getBinary("data");
 
 				logger.info("handling reply to client {}, command: {}", agentId, command);
-				logger.info("{}", new String(data));
-				logger.info("{}", ConnectionRegistry.getInstance().list());
-				ConnectionRegistry.getInstance().get(agentId).ifPresent(con -> {
-					logger.info("Got a connection.... sending");
-					reply(command, agentId, data, con);
-				});
+				Optional<ServerWebSocket> con = ConnectionRegistry.getInstance().get(agentId);
+				if (!con.isPresent()) {
+					logger.warn("Cannot send message to client {}, command: {}. Agent is not connected", agentId,
+							command);
+				} else {
+					reply(command, agentId, data, con.get());
+				}
 			}
 
 		});

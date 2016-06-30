@@ -72,7 +72,7 @@ public class Listener {
 	}
 
 	public void receive(String clientId, byte[] value) {
-		logger.info("Writing to server {}:{}", clientId, new String(value));
+		logger.info("Writing to server {}:{} bytes", clientId, value.length);
 		serverHandlers.get(clientId).write(new Buffer(value));
 	}
 
@@ -107,8 +107,8 @@ public class Listener {
 				@Override
 				public void handle(Buffer buffer) {
 					byte[] data = buffer.getBytes();
-					logger.info("Received data from local client, redirecting to remote server: {}", new String(data));
-					logger.debug("Data: {}", new String(data));
+					logger.info("Received {} bytes from local client, redirecting to remote server: {}", data.length,
+							clientId);
 					byte[] messageData = new JsonObject() //
 							.putString("server-host", listener.hostPortConfig.serverHost) //
 							.putNumber("server-dest-port", listener.hostPortConfig.remotePort) //

@@ -55,11 +55,12 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	@Override
 	public void onInitialize(String agentId, String command, List<String> pathParams,
 			Map<String, String> queryParameters, Connection connection) {
-		logger.info("Initializing Port Redirection");
-
 		String host = queryParameters.get("host");
 		int port = Integer.parseInt(queryParameters.get("port"));
 		int localPort = Integer.parseInt(queryParameters.get("localPort"));
+
+		logger.info("Initializing Port Redirection. LocalPort: {}, Host: {}, Port: {}", localPort, host, port);
+
 		HostPortConfig hostPortConfig = new HostPortConfig(host, port, localPort);
 
 		Listener listener = new Listener(agentId, command, connection, hostPortConfig);

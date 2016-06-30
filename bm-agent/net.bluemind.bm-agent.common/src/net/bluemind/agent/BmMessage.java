@@ -54,7 +54,7 @@ public class BmMessage {
 
 	@Override
 	public String toString() {
-		return String.format("Id: %s\r\nCommand: %s", agentId, command);
+		return String.format("Id: %s, Command: %s", agentId, command);
 	}
 
 }
