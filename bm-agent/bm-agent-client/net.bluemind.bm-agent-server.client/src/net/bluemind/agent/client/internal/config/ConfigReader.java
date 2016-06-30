@@ -44,6 +44,7 @@ public class ConfigReader {
 
 			return mapper.readValue(data, ClientConfig.class);
 		} catch (Exception e) {
+			logger.debug("Config error", e);
 			logger.warn("Cannot load config from {}, using defaults", filepath);
 		}
 		return new ClientConfig("localhost", PORT, "bm-agent");

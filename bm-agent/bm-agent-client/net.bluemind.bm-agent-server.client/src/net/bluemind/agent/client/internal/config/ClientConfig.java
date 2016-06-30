@@ -45,6 +45,14 @@ public class ClientConfig {
 		this.port = port;
 	}
 
+	public String getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
+	}
+
 	public String host;
 	public int port;
 	public String agentId;
