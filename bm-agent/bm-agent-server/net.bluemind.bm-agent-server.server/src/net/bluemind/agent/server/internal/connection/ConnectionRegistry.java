@@ -41,7 +41,7 @@ public class ConnectionRegistry {
 	}
 
 	public void register(String id, ServerWebSocket connection) {
-		connections.putIfAbsent(id, connection);
+		connections.put(id, connection);
 	}
 
 	private static class Holder {
@@ -56,9 +56,9 @@ public class ConnectionRegistry {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("Connections: %d\r\n", connections.size()));
 		for (String agent : connections.keySet()) {
-			sb.append(String.format("Connection: %s\r\n", agent));	
+			sb.append(String.format("Connection: %s\r\n", agent));
 		}
 		return sb.toString();
-	}	
+	}
 
 }
