@@ -38,14 +38,24 @@ public class PingClientHandler implements AgentClientHandler {
 	}
 
 	@Override
-	public void onInitialize(String command, ClientConnection connection) {
+	public void onInitialize(final String command, final ClientConnection connection) {
+		ping(command, connection);
+		new Thread(() -> {
+			try {
+				Thread.sleep(30000);
+			} catch (InterruptedException e) {
+			}
+			ping(command, connection);
+		}).start();
+	}
+
+	private void ping(String command, ClientConnection connection) {
 		logger.info("Pinging server");
 		try {
 			connection.send(command, "ping".getBytes());
 		} catch (Exception e) {
 			logger.warn("Cannot ping server", e);
 		}
-
 	}
 
 }
