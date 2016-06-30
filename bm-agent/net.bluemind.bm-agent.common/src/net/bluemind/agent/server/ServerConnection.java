@@ -20,32 +20,10 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.client.handler.ping;
+package net.bluemind.agent.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public interface ServerConnection {
 
-import net.bluemind.agent.client.AgentClientHandler;
-import net.bluemind.agent.client.ClientConnection;
-
-public class PingClientHandler implements AgentClientHandler {
-
-	Logger logger = LoggerFactory.getLogger(PingClientHandler.class);
-
-	@Override
-	public void onMessage(byte[] data) {
-		logger.info("Got a message: {}", new String(data));
-	}
-
-	@Override
-	public void onInitialize(String command, ClientConnection connection) {
-		logger.info("Pinging server");
-		try {
-			connection.send(command, "ping".getBytes());
-		} catch (Exception e) {
-			logger.warn("Cannot ping server", e);
-		}
-
-	}
+	public void send(String agentId, String command, byte[] data);
 
 }

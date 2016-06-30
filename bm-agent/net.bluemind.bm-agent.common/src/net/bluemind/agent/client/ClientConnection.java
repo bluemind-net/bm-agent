@@ -20,10 +20,10 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent;
+package net.bluemind.agent.client;
 
-public interface Connection {
+public interface ClientConnection {
 
-	public void send(String agentId, String command, byte[] data);
+	public void send(String command, byte[] data);
 
 }

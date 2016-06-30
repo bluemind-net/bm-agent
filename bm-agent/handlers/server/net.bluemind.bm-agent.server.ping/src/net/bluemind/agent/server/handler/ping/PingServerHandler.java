@@ -28,15 +28,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.bluemind.agent.Connection;
 import net.bluemind.agent.server.AgentServerHandler;
+import net.bluemind.agent.server.ServerConnection;
 
 public class PingServerHandler implements AgentServerHandler {
 
 	Logger logger = LoggerFactory.getLogger(PingServerHandler.class);
 
 	@Override
-	public void onMessage(String agentId, String command, byte[] data, Connection connection) {
+	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection) {
 		logger.info("Received a ping message from {}: {}", agentId, new String(data));
 		try {
 			connection.send(agentId, command, "pong".getBytes());
@@ -47,8 +47,8 @@ public class PingServerHandler implements AgentServerHandler {
 	}
 
 	@Override
-	public void onInitialize(String agentId, String command, List<String> pathParams, Map<String, String> queryParameters,
-			Connection connection) {
+	public void onInitialize(String agentId, String command, List<String> pathParams,
+			Map<String, String> queryParameters, ServerConnection connection) {
 
 	}
 

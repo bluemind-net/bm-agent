@@ -29,8 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
-import net.bluemind.agent.Connection;
 import net.bluemind.agent.client.AgentClientHandler;
+import net.bluemind.agent.client.ClientConnection;
 
 public class PortRedirectClientHandler implements AgentClientHandler {
 
@@ -73,29 +73,29 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 	}
 
 	@Override
-	public void onInitialize(String command, Connection connection) {
+	public void onInitialize(String command, ClientConnection connection) {
 		this.connection = new PortRedirectionConnection(connection, command);
 	}
 
-	public static class PortRedirectionConnection implements Connection {
+	public static class PortRedirectionConnection implements ClientConnection {
 
 		Logger logger = LoggerFactory.getLogger(PortRedirectionConnection.class);
 
-		private final Connection connection;
+		private final ClientConnection connection;
 		private final String command;
 
-		public PortRedirectionConnection(Connection connection, String command) {
+		public PortRedirectionConnection(ClientConnection connection, String command) {
 			this.connection = connection;
 			this.command = command;
 		}
 
 		public void send(byte[] data) {
-			send(null, this.command, data);
+			send(this.command, data);
 		}
 
 		@Override
-		public void send(String agentId, String command, byte[] data) {
-			connection.send(agentId, command, data);
+		public void send(String command, byte[] data) {
+			connection.send(command, data);
 		}
 
 		public void remove(String clientId) {

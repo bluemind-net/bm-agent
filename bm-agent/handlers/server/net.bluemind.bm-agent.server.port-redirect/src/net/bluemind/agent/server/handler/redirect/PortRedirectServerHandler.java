@@ -30,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
-import net.bluemind.agent.Connection;
 import net.bluemind.agent.server.AgentServerHandler;
+import net.bluemind.agent.server.ServerConnection;
 import net.bluemind.agent.server.handler.redirect.config.HostPortConfig;
 
 public class PortRedirectServerHandler implements AgentServerHandler {
@@ -41,7 +41,7 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	public static final Map<Integer, Listener> localServers = new ConcurrentHashMap<>();
 
 	@Override
-	public void onMessage(String agentId, String command, byte[] data, Connection connection) {
+	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection) {
 		JsonObject obj = new JsonObject(new String(data));
 		String clientId = obj.getString("client-id");
 		int clientPort = obj.getInteger("client-port");
@@ -54,7 +54,7 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 
 	@Override
 	public void onInitialize(String agentId, String command, List<String> pathParams,
-			Map<String, String> queryParameters, Connection connection) {
+			Map<String, String> queryParameters, ServerConnection connection) {
 		String host = queryParameters.get("host");
 		int port = Integer.parseInt(queryParameters.get("port"));
 		int localPort = Integer.parseInt(queryParameters.get("localPort"));

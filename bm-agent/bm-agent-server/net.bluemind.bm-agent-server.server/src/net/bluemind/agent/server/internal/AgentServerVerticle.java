@@ -39,11 +39,11 @@ import org.vertx.java.platform.Verticle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.bluemind.agent.Connection;
+import net.bluemind.agent.server.ServerConnection;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry.AgentHandler;
 
-public class AgentServerVerticle extends Verticle implements Connection {
+public class AgentServerVerticle extends Verticle implements ServerConnection {
 	public static final String address = "agent.message";
 	public static String address_init = "agent.init";
 

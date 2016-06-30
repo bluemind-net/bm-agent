@@ -34,8 +34,8 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.net.NetServer;
 import org.vertx.java.core.net.NetSocket;
 
-import net.bluemind.agent.Connection;
 import net.bluemind.agent.VertxHolder;
+import net.bluemind.agent.server.ServerConnection;
 import net.bluemind.agent.server.handler.redirect.config.HostPortConfig;
 
 public class Listener {
@@ -44,11 +44,11 @@ public class Listener {
 
 	public final String agentId;
 	public final String command;
-	public final Connection connection;
+	public final ServerConnection connection;
 	public final HostPortConfig hostPortConfig;
 	public final Map<String, ServerHandler> serverHandlers;
 
-	public Listener(String agentId, String command, Connection connection, HostPortConfig hostPortConfig) {
+	public Listener(String agentId, String command, ServerConnection connection, HostPortConfig hostPortConfig) {
 		this.agentId = agentId;
 		this.command = command;
 		this.connection = connection;

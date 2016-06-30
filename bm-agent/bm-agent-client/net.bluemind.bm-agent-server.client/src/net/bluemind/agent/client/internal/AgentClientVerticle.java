@@ -32,11 +32,11 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
-import net.bluemind.agent.Connection;
+import net.bluemind.agent.client.ClientConnection;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
 
-public class AgentClientVerticle extends Verticle implements Connection {
+public class AgentClientVerticle extends Verticle implements ClientConnection {
 	public static final String address_init = "agent.init";
 	public static final String address_message = "agent.message";
 
@@ -80,7 +80,7 @@ public class AgentClientVerticle extends Verticle implements Connection {
 	}
 
 	@Override
-	public void send(String agentId, String command, byte[] data) {
+	public void send(String command, byte[] data) {
 		JsonObject obj = new JsonObject() //
 				.putString("command", command) //
 				.putBinary("data", data) //

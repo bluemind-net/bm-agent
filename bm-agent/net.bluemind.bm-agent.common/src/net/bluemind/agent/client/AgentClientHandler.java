@@ -22,11 +22,9 @@
  */
 package net.bluemind.agent.client;
 
-import net.bluemind.agent.Connection;
-
 public interface AgentClientHandler {
 
-	public void onInitialize(String command, Connection connection);
+	public void onInitialize(String command, ClientConnection connection);
 
 	public void onMessage(byte[] data);
 
