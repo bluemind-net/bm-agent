@@ -66,6 +66,7 @@ public class Listener {
 				String clientId = UUID.randomUUID().toString();
 				ServerHandler serverHandler = new ServerHandler(clientId, netSocket, Listener.this);
 				serverHandlers.put(clientId, serverHandler);
+				serverHandler.init();
 			}
 		});
 		createNetServer.listen(hostPortConfig.localPort);
@@ -92,6 +93,10 @@ public class Listener {
 			setupHandlers();
 		}
 
+		public void init() {
+			listener.connection.send(listener.agentId, listener.command, new byte[0]);
+		}
+
 		private void setupHandlers() {
 			netSocket.closeHandler(new Handler<Void>() {
 
@@ -109,12 +114,7 @@ public class Listener {
 					byte[] data = buffer.getBytes();
 					logger.info("Received {} bytes from local client, redirecting to remote server: {}", data.length,
 							clientId);
-					byte[] messageData = new JsonObject() //
-							.putString("server-host", listener.hostPortConfig.serverHost) //
-							.putNumber("server-dest-port", listener.hostPortConfig.remotePort) //
-							.putNumber("client-port", listener.hostPortConfig.localPort) //
-							.putString("client-id", clientId) //
-							.putBinary("data", data).asObject().encode().getBytes();
+					byte[] messageData = createMessage(data);
 					listener.connection.send(listener.agentId, listener.command, messageData);
 
 				}
@@ -134,6 +134,16 @@ public class Listener {
 					logger.warn("Error occured while talking to local client {}", clientId, event);
 				}
 			});
+		}
+
+		private byte[] createMessage(byte[] data) {
+			byte[] messageData = new JsonObject() //
+					.putString("server-host", listener.hostPortConfig.serverHost) //
+					.putNumber("server-dest-port", listener.hostPortConfig.remotePort) //
+					.putNumber("client-port", listener.hostPortConfig.localPort) //
+					.putString("client-id", clientId) //
+					.putBinary("data", data).asObject().encode().getBytes();
+			return messageData;
 		}
 
 		protected void tryWrite() {
