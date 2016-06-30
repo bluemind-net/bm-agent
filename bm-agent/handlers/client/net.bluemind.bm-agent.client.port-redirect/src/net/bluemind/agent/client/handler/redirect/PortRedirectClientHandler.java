@@ -42,15 +42,15 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 	public void onMessage(byte[] data) {
 
 		logger.info("Received a port redirect message containing {} bytes", data.length);
-		logger.trace("data: {}", new String(data));
 
 		JsonObject obj = new JsonObject(new String(data));
-
 		String serverHost = obj.getString("server-host");
 		int serverDestPort = obj.getInteger("server-dest-port");
 		int clientPort = obj.getInteger("client-port");
 		String clientId = obj.getString("client-id");
 		byte[] value = obj.getBinary("data");
+
+		logger.trace("data: {}", new String(value));
 
 		ConnectionHandler handler = null;
 		if (handlers.containsKey(clientId)) {
@@ -68,7 +68,9 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 			handlers.put(clientId, handler);
 		}
 
-		handler.write(value);
+		if (!new String(value).equals("syn/ack")) {
+			handler.write(value);
+		}
 
 	}
 

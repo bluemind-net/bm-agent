@@ -72,7 +72,8 @@ public class ConnectionHandler {
 						socket.dataHandler(new Handler<Buffer>() {
 							public void handle(Buffer event) {
 								byte[] data = event.getBytes();
-								logger.info("Received {} bytes from server, redirecting to client: {}", data.length);
+								logger.info("Received {} bytes from local server, redirecting to agent-server: {}",
+										data.length, clientId);
 								logger.trace("data: {}", new String(data));
 								byte[] messageData = new JsonObject() //
 										.putNumber("client-port", clientPort) //

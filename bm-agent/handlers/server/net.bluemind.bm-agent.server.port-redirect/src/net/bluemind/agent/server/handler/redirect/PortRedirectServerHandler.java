@@ -47,7 +47,8 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		int clientPort = obj.getInteger("client-port");
 		byte[] value = obj.getBinary("data");
 
-		logger.info("Received data for from server for client port {}, id: {}", clientPort, clientId);
+		logger.info("Received data for from client-agent for client port {}, id: {}", clientPort, clientId);
+		logger.trace("data: {}", new String(value));
 		localServers.get(clientPort).receive(clientId, value);
 
 	}

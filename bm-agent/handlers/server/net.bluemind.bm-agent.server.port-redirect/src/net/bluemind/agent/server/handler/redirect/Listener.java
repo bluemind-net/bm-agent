@@ -83,7 +83,7 @@ public class Listener {
 		private final NetSocket netSocket;
 		private final Listener listener;
 		boolean stopped;
-		private Buffer buffer = new Buffer();
+		private Buffer readBuffer = new Buffer();
 
 		public ServerHandler(String clientId, NetSocket netSocket, Listener listener) {
 			this.netSocket = netSocket;
@@ -94,7 +94,8 @@ public class Listener {
 		}
 
 		public void init() {
-			listener.connection.send(listener.agentId, listener.command, new byte[0]);
+			byte[] messageData = createMessage("syn/ack".getBytes());
+			listener.connection.send(listener.agentId, listener.command, messageData);
 		}
 
 		private void setupHandlers() {
@@ -112,11 +113,11 @@ public class Listener {
 				@Override
 				public void handle(Buffer buffer) {
 					byte[] data = buffer.getBytes();
-					logger.info("Received {} bytes from local client, redirecting to remote server: {}", data.length,
+					logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 							clientId);
+					logger.trace("data: {}", new String(data));
 					byte[] messageData = createMessage(data);
 					listener.connection.send(listener.agentId, listener.command, messageData);
-
 				}
 			});
 			netSocket.drainHandler(new Handler<Void>() {
@@ -148,8 +149,8 @@ public class Listener {
 
 		protected void tryWrite() {
 			if (!netSocket.writeQueueFull()) {
-				netSocket.write(buffer);
-				buffer = new Buffer();
+				netSocket.write(readBuffer);
+				readBuffer = new Buffer();
 			} else {
 				stopped = true;
 			}
@@ -157,7 +158,7 @@ public class Listener {
 		}
 
 		public void write(Buffer data) {
-			buffer.appendBuffer(data);
+			readBuffer.appendBuffer(data);
 			tryWrite();
 		}
 
