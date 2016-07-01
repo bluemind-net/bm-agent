@@ -30,7 +30,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
@@ -56,50 +55,41 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 
 		EventBus eventBus = vertx.eventBus();
 
-		eventBus.registerHandler(address, new Handler<Message<JsonObject>>() {
-
-			@Override
-			public void handle(Message<JsonObject> event) {
-				String command = event.body().getString("command");
-				String agentId = event.body().getString("agentId");
-				byte[] data = event.body().getBinary("data");
-				Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
-				handler.ifPresent(h -> {
-					logger.info("Found handler {} for command {}", h.info, command);
-					h.handler.onMessage(agentId, command, data, AgentServerVerticle.this);
-				});
-
-			}
+		eventBus.registerHandler(address, (Message<JsonObject> event) -> {
+			String command = event.body().getString("command");
+			String agentId = event.body().getString("agentId");
+			byte[] data = event.body().getBinary("data");
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
+			handler.ifPresent(h -> {
+				logger.info("Found handler {} for command {}", h.info, command);
+				h.handler.onMessage(agentId, command, data, AgentServerVerticle.this);
+			});
 		});
 
-		eventBus.registerHandler(address_command, new Handler<Message<JsonObject>>() {
-
-			@Override
-			public void handle(Message<JsonObject> event) {
-				String method = event.body().getString("method");
-				String command = event.body().getString("command");
-				String agentId = event.body().getString("agentId");
-				JsonArray pathParameters = event.body().getArray("pathParameters");
-				List<String> pathParams = new ArrayList<>();
-				for (int i = 0; i < pathParameters.size(); i++) {
-					pathParams.add(pathParameters.get(i));
-				}
-
-				Map<String, String> queryParameters = null;
-				try {
-					queryParameters = new ObjectMapper().readValue(event.body().getString("queryParameters"),
-							HashMap.class);
-				} catch (Exception e) {
-				}
-				final Map<String, String> qParams = queryParameters;
-
-				Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
-				handler.ifPresent(h -> {
-					logger.info("Found handler {} for command {}", h.info, command);
-					h.handler.onCommand(agentId, method, command, pathParams, qParams, AgentServerVerticle.this);
-				});
-
+		eventBus.registerHandler(address_command, (Message<JsonObject> event) -> {
+			String method = event.body().getString("method");
+			String command = event.body().getString("command");
+			String agentId = event.body().getString("agentId");
+			JsonArray pathParameters = event.body().getArray("pathParameters");
+			List<String> pathParams = new ArrayList<>();
+			for (int i = 0; i < pathParameters.size(); i++) {
+				pathParams.add(pathParameters.get(i));
 			}
+
+			Map<String, String> queryParameters = null;
+			try {
+				queryParameters = new ObjectMapper().readValue(event.body().getString("queryParameters"),
+						HashMap.class);
+			} catch (Exception e) {
+			}
+			final Map<String, String> qParams = queryParameters;
+
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
+			handler.ifPresent(h -> {
+				logger.info("Found handler {} for command {}", h.info, command);
+				h.handler.onCommand(agentId, method, command, pathParams, qParams, AgentServerVerticle.this);
+			});
+
 		});
 
 	}

@@ -41,11 +41,13 @@ public class PingClientHandler implements AgentClientHandler {
 	public void onInitialize(final String command, final ClientConnection connection) {
 		ping(command, connection);
 		new Thread(() -> {
-			try {
-				Thread.sleep(30000);
-			} catch (InterruptedException e) {
+			while (true) {
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException e) {
+				}
+				ping(command, connection);
 			}
-			ping(command, connection);
 		}).start();
 	}
 

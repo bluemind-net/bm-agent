@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServer;
@@ -81,24 +80,18 @@ public class AgentServer extends Verticle {
 			handleCommand(command);
 		}).listen(config.port, config.listenerAddress);
 
-		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
+		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
+			String command = event.body().getString("command");
+			String agentId = event.body().getString("agentId");
+			byte[] data = event.body().getBinary("data");
 
-			@Override
-			public void handle(Message<JsonObject> event) {
-				String command = event.body().getString("command");
-				String agentId = event.body().getString("agentId");
-				byte[] data = event.body().getBinary("data");
-
-				logger.info("handling reply to client {}, command: {}", agentId, command);
-				Optional<ServerWebSocket> con = ConnectionRegistry.getInstance().get(agentId);
-				if (!con.isPresent()) {
-					logger.warn("Cannot send message to client {}, command: {}. Agent is not connected", agentId,
-							command);
-				} else {
-					reply(command, agentId, data, con.get());
-				}
+			logger.info("handling reply to client {}, command: {}", agentId, command);
+			Optional<ServerWebSocket> con = ConnectionRegistry.getInstance().get(agentId);
+			if (!con.isPresent()) {
+				logger.warn("Cannot send message to client {}, command: {}. Agent is not connected", agentId, command);
+			} else {
+				reply(command, agentId, data, con.get());
 			}
-
 		});
 
 	}

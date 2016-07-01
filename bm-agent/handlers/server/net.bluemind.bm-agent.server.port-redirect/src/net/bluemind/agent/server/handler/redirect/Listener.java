@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.net.NetServer;
@@ -60,15 +59,11 @@ public class Listener {
 	public void start() throws Exception {
 
 		server = VertxHolder.vertx.createNetServer();
-		server.connectHandler(new Handler<NetSocket>() {
-
-			@Override
-			public void handle(NetSocket netSocket) {
-				String clientId = UUID.randomUUID().toString();
-				ServerHandler serverHandler = new ServerHandler(clientId, netSocket, Listener.this);
-				serverHandlers.put(clientId, serverHandler);
-				serverHandler.init();
-			}
+		server.connectHandler((NetSocket netSocket) -> {
+			String clientId = UUID.randomUUID().toString();
+			ServerHandler serverHandler = new ServerHandler(clientId, netSocket, Listener.this);
+			serverHandlers.put(clientId, serverHandler);
+			serverHandler.init();
 		});
 		server.listen(hostPortConfig.localPort);
 	}
@@ -104,35 +99,24 @@ public class Listener {
 		}
 
 		private void setupHandlers() {
-			netSocket.closeHandler(new Handler<Void>() {
+			netSocket.closeHandler((Void event) -> {
+				logger.info("Disconnecting from local client {}", clientId);
+				byte[] messageData = createMessage("ack/end".getBytes());
+				listener.connection.send(listener.agentId, listener.command, messageData);
+				listener.remove(clientId);
+			}
 
-				@Override
-				public void handle(Void event) {
-					logger.info("Disconnecting from local client {}", clientId);
-					byte[] messageData = createMessage("ack/end".getBytes());
-					listener.connection.send(listener.agentId, listener.command, messageData);
-					listener.remove(clientId);
-				}
-
+			);
+			netSocket.dataHandler((Buffer buffer) -> {
+				byte[] data = buffer.getBytes();
+				logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
+						clientId);
+				logger.trace("data: {}", new String(data));
+				byte[] messageData = createMessage(data);
+				listener.connection.send(listener.agentId, listener.command, messageData);
 			});
-			netSocket.dataHandler(new Handler<Buffer>() {
-
-				@Override
-				public void handle(Buffer buffer) {
-					byte[] data = buffer.getBytes();
-					logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
-							clientId);
-					logger.trace("data: {}", new String(data));
-					byte[] messageData = createMessage(data);
-					listener.connection.send(listener.agentId, listener.command, messageData);
-				}
-			});
-			netSocket.exceptionHandler(new Handler<Throwable>() {
-
-				@Override
-				public void handle(Throwable event) {
-					logger.warn("Error occured while talking to local client {}", clientId, event);
-				}
+			netSocket.exceptionHandler((Throwable event) -> {
+				logger.warn("Error occured while talking to local client {}", clientId, event);
 			});
 		}
 
@@ -152,12 +136,8 @@ public class Listener {
 				readBuffer = new Buffer();
 				if (netSocket.writeQueueFull()) {
 					stopped = true;
-					netSocket.drainHandler(new Handler<Void>() {
-
-						@Override
-						public void handle(Void event) {
-							stopped = false;
-						}
+					netSocket.drainHandler((Void event) -> {
+						stopped = false;
 					});
 				}
 			}

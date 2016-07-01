@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpClient;
@@ -51,6 +50,7 @@ public class AgentClient extends Verticle {
 	private WebSocket ws;
 	private final MessageParser parser;
 	private ClientConfig config;
+	private boolean connected = false;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
@@ -64,16 +64,12 @@ public class AgentClient extends Verticle {
 		config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
 		connect();
 
-		vertx.eventBus().registerHandler(address, new Handler<Message<JsonObject>>() {
+		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
+			String command = event.body().getString("command");
+			byte[] data = event.body().getBinary("data");
 
-			@Override
-			public void handle(Message<JsonObject> event) {
-				String command = event.body().getString("command");
-				byte[] data = event.body().getBinary("data");
-
-				logger.info("handling message to server {}, command: {}", config.agentId, command);
-				send(command, data);
-			}
+			logger.info("handling message to server {}, command: {}", config.agentId, command);
+			send(command, data);
 		});
 
 	}
@@ -84,15 +80,22 @@ public class AgentClient extends Verticle {
 		message.setCommand(command);
 		message.setData(data);
 		try {
-			Buffer buffer = new Buffer(parser.write(message));
-			logger.info("Writing {} bytes to websocket", buffer.length());
-			ws.write(buffer);
+			Buffer dataBuffer = new Buffer(parser.write(message));
+			if (connected) {
+				logger.info("Writing {} bytes to websocket", dataBuffer.length());
+				ws.write(dataBuffer);
+			} else {
+				logger.info("Lost connection to server... trying to reconnect", dataBuffer.length());
+				connect();
+			}
 		} catch (Exception e) {
-			logger.warn("Cannot send reply to client", e);
+			logger.warn("Cannot send reply to server", e);
 		}
 	}
 
 	private void connect() {
+		logger.info("Connecting to {}:{}", config.host, config.port);
+
 		HttpClient client = vertx.createHttpClient() //
 				.setMaxWebSocketFrameSize(WS_FRAMESIZE) //
 				.setHost(config.host) //
@@ -100,13 +103,17 @@ public class AgentClient extends Verticle {
 
 		client.connectWebsocket("/", (ws -> {
 			logger.info("Connected to websocket");
+			connected = true;
 			this.ws = ws;
 			ws.dataHandler(data -> {
 				logger.info("Read {} bytes from websocket", data.length());
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
-
+			ws.closeHandler((v) -> {
+				connected = false;
+				connect();
+			});
 			registerHandlers();
 		}));
 	}

@@ -61,51 +61,41 @@ public class ConnectionHandler {
 		logger.info("Going to connect to {}:{}", serverHost, serverDestPort);
 		Vertx vertx = VertxHolder.vertx;
 		NetClient client = vertx.createNetClient();
-		client.connect(serverDestPort, serverHost, new Handler<AsyncResult<NetSocket>>() {
-			public void handle(AsyncResult<NetSocket> asyncResult) {
-				if (asyncResult.succeeded()) {
-					logger.info("Connected to server {}:{}", serverHost, serverDestPort);
-					socket = asyncResult.result();
-					socket.dataHandler(new Handler<Buffer>() {
-						public void handle(Buffer event) {
-							byte[] data = event.getBytes();
-							logger.info("Received {} bytes from local server, redirecting to agent-server: {}",
-									data.length, clientId);
-							logger.trace("data: {}", new String(data));
-							byte[] messageData = new JsonObject() //
-									.putNumber("client-port", clientPort) //
-									.putString("client-id", clientId) //
-									.putBinary("data", data).asObject().encode().getBytes();
-							connection.send(messageData);
+		client.connect(serverDestPort, serverHost, (AsyncResult<NetSocket> asyncResult) -> {
+			if (asyncResult.succeeded()) {
+				logger.info("Connected to server {}:{}", serverHost, serverDestPort);
+				socket = asyncResult.result();
+				socket.dataHandler(new Handler<Buffer>() {
+					public void handle(Buffer event) {
+						byte[] data = event.getBytes();
+						logger.info("Received {} bytes from local server, redirecting to agent-server: {}", data.length,
+								clientId);
+						logger.trace("data: {}", new String(data));
+						byte[] messageData = new JsonObject() //
+								.putNumber("client-port", clientPort) //
+								.putString("client-id", clientId) //
+								.putBinary("data", data).asObject().encode().getBytes();
+						connection.send(messageData);
 
-						}
-					});
-					socket.closeHandler(new Handler<Void>() {
-
-						@Override
-						public void handle(Void event) {
-							logger.info("Socket to {}:{} has been closed", serverHost, serverDestPort);
-							connection.remove(ConnectionHandler.this.clientId);
-						}
-					});
-					socket.exceptionHandler(new Handler<Throwable>() {
-
-						@Override
-						public void handle(Throwable event) {
-							logger.warn("Error while talking to {}:{}", serverHost, serverDestPort, event);
-						}
-					});
-					if (buffer.length() > 0) {
-						socket.write(buffer);
-						buffer = new Buffer();
 					}
-					connected = true;
-				} else {
-					logger.warn("Cannot connect to server {}:{}", serverHost, serverDestPort, asyncResult.cause());
+				});
+				socket.closeHandler((Void event) -> {
+					logger.info("Socket to {}:{} has been closed", serverHost, serverDestPort);
+					connection.remove(ConnectionHandler.this.clientId);
+				});
+				socket.exceptionHandler((Throwable event) -> {
+					logger.warn("Error while talking to {}:{}", serverHost, serverDestPort, event);
+				});
+				if (buffer.length() > 0) {
+					socket.write(buffer);
+					buffer = new Buffer();
 				}
+				connected = true;
+			} else {
+				logger.warn("Cannot connect to server {}:{}", serverHost, serverDestPort, asyncResult.cause());
 			}
-		});
 
+		});
 	}
 
 	public void write(byte[] value) {

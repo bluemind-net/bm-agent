@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
@@ -48,33 +47,25 @@ public class AgentClientVerticle extends Verticle implements ClientConnection {
 
 		EventBus eventBus = vertx.eventBus();
 
-		eventBus.registerHandler(address_init, new Handler<Message<JsonObject>>() {
+		eventBus.registerHandler(address_init, (Message<JsonObject> event) -> {
+			String command = event.body().getString("command");
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
+			handler.ifPresent(h -> {
+				logger.info("Found handler {} for command {}", h.info, command);
+				h.handler.onInitialize(command, AgentClientVerticle.this);
+			});
 
-			@Override
-			public void handle(Message<JsonObject> event) {
-				String command = event.body().getString("command");
-				Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
-				handler.ifPresent(h -> {
-					logger.info("Found handler {} for command {}", h.info, command);
-					h.handler.onInitialize(command, AgentClientVerticle.this);
-				});
-
-			}
 		});
 
-		eventBus.registerHandler(address_message, new Handler<Message<JsonObject>>() {
+		eventBus.registerHandler(address_message, (Message<JsonObject> event) -> {
+			String command = event.body().getString("command");
+			byte[] data = event.body().getBinary("data");
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
+			handler.ifPresent(h -> {
+				logger.info("Found handler {} for command {}", h.info, command);
+				h.handler.onMessage(data);
+			});
 
-			@Override
-			public void handle(Message<JsonObject> event) {
-				String command = event.body().getString("command");
-				byte[] data = event.body().getBinary("data");
-				Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
-				handler.ifPresent(h -> {
-					logger.info("Found handler {} for command {}", h.info, command);
-					h.handler.onMessage(data);
-				});
-
-			}
 		});
 
 	}
