@@ -6,8 +6,8 @@
 # Required-Stop: $syslog $network
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
-# Short-Description: BM agent server.
-# Description: init system for BlueMind agent server.
+# Short-Description: BM agent client.
+# Description: init system for BlueMind agent client.
 ### END INIT INFO
 
 [ -f /lib/init/vars.sh ] && source /lib/init/vars.sh
@@ -15,7 +15,7 @@ if [ "$VERBOSE" == "yes" ]; then
 	set -x
 fi
 
-BM_SERVICE="BlueMind agent server"
+BM_SERVICE="BlueMind agent client"
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 if [ -e /usr/bin/bm_java_home ]; then
@@ -31,36 +31,36 @@ test -f $JAVA_HOME/bin/java || {
 }
 
 
-bmagentserver_pid=/var/run/bm-agent-client.pid
-bmagentserver_home=/usr/share/bm-agent-client
-bmagentserver_logs=/var/log/bm-agent-client/bm-agent-client.log
+bmagentclient_pid=/var/run/bm-agent-client.pid
+bmagentclient_home=/usr/share/bm-agent-client
+bmagentclient_logs=/var/log/bm-agent-client/bm-agent-client.log
 jps=$JAVA_HOME/bin/jps
 
-bmagentserver_running() {
-    test -f ${bmagentserver_pid} || return 1
-    supposed_pid=`cat ${bmagentserver_pid}`
+bmagentclient_running() {
+    test -f ${bmagentclient_pid} || return 1
+    supposed_pid=`cat ${bmagentclient_pid}`
 
     kill -0 ${supposed_pid} >/dev/null 2>&1
     ret=$?
 
     if [ ${ret} -ne 0 ]; then
-        rm -f ${bmagentserver_pid} > /dev/null 2>&1 || true
+        rm -f ${bmagentclient_pid} > /dev/null 2>&1 || true
     fi
 
     return ${ret}
 }
 
-start_bmagentserver() {
-    bmagentserver_running && {
-	echo "${BM_SERVICE} Server already running."
+start_bmagentclient() {
+    bmagentclient_running && {
+	echo "${BM_SERVICE} client already running."
         return 0
     }
 
-    ${bmagentserver_home}/bm-agent-client 0>/dev/null 1>/dev/null 2>/dev/null 3>/dev/null &
+    ${bmagentclient_home}/bm-agent-client 0>/dev/null 1>/dev/null 2>/dev/null 3>/dev/null &
     new_pid=$!
-    echo $new_pid > $bmagentserver_pid 
-    echo -n "Starting server ${BM_SERVICE} (PID: `cat ${bmagentserver_pid}`)"
-    bmagentserver_running
+    echo $new_pid > $bmagentclient_pid 
+    echo -n "Starting client ${BM_SERVICE} (PID: `cat ${bmagentclient_pid}`)"
+    bmagentclient_running
     running=$?
 
     if [ ${running} -eq 0 ]; then
@@ -72,36 +72,36 @@ start_bmagentserver() {
     return ${running}
 }
 
-stop_bmagentserver() {
-    bmagentserver_running || {
-	echo "${BM_SERVICE} Server not running."
+stop_bmagentclient() {
+    bmagentclient_running || {
+	echo "${BM_SERVICE} client not running."
 	return 0
     }
 
     if [ -f /sbin/start-stop-daemon ]; then
-        start-stop-daemon --stop --quiet --oknodo --pidfile ${bmagentserver_pid}
+        start-stop-daemon --stop --quiet --oknodo --pidfile ${bmagentclient_pid}
     else
-        kill -TERM `cat ${bmagentserver_pid}`
+        kill -TERM `cat ${bmagentclient_pid}`
     fi
 
-    echo -n "Waiting for ${BM_SERVICE} Server shutdown."
+    echo -n "Waiting for ${BM_SERVICE} client shutdown."
     count=0
-    while bmagentserver_running; do
+    while bmagentclient_running; do
 	echo -n "."
 	sleep 0.5
 	count=$((${count}+1))
         if [ ${count} -gt 10 ]; then
-          kill -9 `cat ${bmagentserver_pid}` || true
+          kill -9 `cat ${bmagentclient_pid}` || true
 	  break
         fi
     done
-    rm -f ${bmagentserver_pid}
+    rm -f ${bmagentclient_pid}
     echo ""
 }
 
-status_bmagentserver() {
-    bmagentserver_running || {
-        echo "${BM_SERVICE} Server not running."
+status_bmagentclient() {
+    bmagentclient_running || {
+        echo "${BM_SERVICE} client not running."
         return 3
     }
 
@@ -110,21 +110,21 @@ status_bmagentserver() {
 
 case "$1" in
     start)
-        start_bmagentserver
+        start_bmagentclient
         ret=$?
         ;;
     
     stop)
-        stop_bmagentserver
+        stop_bmagentclient
         ret=$?
         ;;
     status)
-	    status_bmagentserver
+	    status_bmagentclient
         ret=$?
 	;;
     restart)
-        stop_bmagentserver
-        start_bmagentserver
+        stop_bmagentclient
+        start_bmagentclient
         ret=$?
         ;;
 esac
