@@ -46,7 +46,7 @@ public class Listener {
 	public final String command;
 	public final ServerConnection connection;
 	public final HostPortConfig hostPortConfig;
-	public final Map<String, ServerHandler> serverHandlers;
+	public static Map<String, ServerHandler> serverHandlers;
 
 	public Listener(String agentId, String command, ServerConnection connection, HostPortConfig hostPortConfig) {
 		this.agentId = agentId;

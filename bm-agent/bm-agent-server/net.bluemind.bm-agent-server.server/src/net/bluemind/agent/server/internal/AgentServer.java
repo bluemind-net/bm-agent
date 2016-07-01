@@ -70,6 +70,7 @@ public class AgentServer extends Verticle {
 			logger.info("Connection to websocket established from client: {}",
 					ws.remoteAddress().getAddress().toString());
 			ws.dataHandler(data -> {
+				logger.info("Read {} bytes from websocket", data.length());
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
@@ -108,6 +109,7 @@ public class AgentServer extends Verticle {
 		message.setData(data);
 		try {
 			Buffer buffer = new Buffer(parser.write(message));
+			logger.info("Writing {} bytes to websocket", buffer.length());
 			con.write(buffer);
 		} catch (Exception e) {
 			logger.warn("Cannot send reply to client {}", agentId, e);
