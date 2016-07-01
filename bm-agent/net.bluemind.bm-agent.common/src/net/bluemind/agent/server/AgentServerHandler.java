@@ -29,7 +29,7 @@ public interface AgentServerHandler {
 
 	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
 
-	public void onInitialize(String agentId, String command, List<String> pathParams,
+	public void onCommand(String agentId, String method, String command, List<String> pathParams,
 			Map<String, String> queryParameters, ServerConnection connection);
 
 }

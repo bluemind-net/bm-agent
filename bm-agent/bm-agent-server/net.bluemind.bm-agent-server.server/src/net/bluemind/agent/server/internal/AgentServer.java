@@ -149,10 +149,11 @@ public class AgentServer extends Verticle {
 		}
 		JsonObject obj = new JsonObject() //
 				.putString("agentId", command.agentId) //
+				.putString("method", command.method) //
 				.putString("command", command.command) //
 				.putString("queryParameters", writeValueAsString).putArray("pathParameters", pathParameters);
 
-		vertx.eventBus().send(AgentServerVerticle.address_init, obj);
+		vertx.eventBus().send(AgentServerVerticle.address_command, obj);
 	}
 
 	private void registerHandlers() {

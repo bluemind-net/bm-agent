@@ -47,6 +47,7 @@ public class Listener {
 	public final ServerConnection connection;
 	public final HostPortConfig hostPortConfig;
 	public static Map<String, ServerHandler> serverHandlers;
+	private NetServer server;
 
 	public Listener(String agentId, String command, ServerConnection connection, HostPortConfig hostPortConfig) {
 		this.agentId = agentId;
@@ -58,8 +59,8 @@ public class Listener {
 
 	public void start() throws Exception {
 
-		NetServer createNetServer = VertxHolder.vertx.createNetServer();
-		createNetServer.connectHandler(new Handler<NetSocket>() {
+		server = VertxHolder.vertx.createNetServer();
+		server.connectHandler(new Handler<NetSocket>() {
 
 			@Override
 			public void handle(NetSocket netSocket) {
@@ -69,7 +70,11 @@ public class Listener {
 				serverHandler.init();
 			}
 		});
-		createNetServer.listen(hostPortConfig.localPort);
+		server.listen(hostPortConfig.localPort);
+	}
+
+	public void stop() {
+		server.close();
 	}
 
 	public void receive(String clientId, byte[] value) {

@@ -54,8 +54,33 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	}
 
 	@Override
-	public void onInitialize(String agentId, String command, List<String> pathParams,
+	public void onCommand(String agentId, String method, String command, List<String> pathParams,
 			Map<String, String> queryParameters, ServerConnection connection) {
+		switch (method) {
+		case "GET":
+			initializePortRedirection(agentId, command, queryParameters, connection);
+			break;
+		case "DELETE":
+			deletePortRedirection(agentId, command, queryParameters, connection);
+			break;
+		}
+
+	}
+
+	private void deletePortRedirection(String agentId, String command, Map<String, String> queryParameters,
+			ServerConnection connection) {
+		String host = queryParameters.get("host");
+		int port = Integer.parseInt(queryParameters.get("port"));
+		int localPort = Integer.parseInt(queryParameters.get("localPort"));
+
+		logger.info("Deleting Port Redirection. LocalPort: {}, Host: {}, Port: {}", localPort, host, port);
+		Listener listener = localServers.get(localPort);
+		listener.stop();
+		localServers.remove(localPort);
+	}
+
+	private void initializePortRedirection(String agentId, String command, Map<String, String> queryParameters,
+			ServerConnection connection) {
 		String host = queryParameters.get("host");
 		int port = Integer.parseInt(queryParameters.get("port"));
 		int localPort = Integer.parseInt(queryParameters.get("localPort"));

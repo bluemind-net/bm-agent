@@ -45,7 +45,7 @@ import net.bluemind.agent.server.internal.handler.HandlerRegistry.AgentHandler;
 
 public class AgentServerVerticle extends Verticle implements ServerConnection {
 	public static final String address = "agent.message";
-	public static String address_init = "agent.init";
+	public static String address_command = "agent.command";
 
 	private static final Logger logger = LoggerFactory.getLogger(AgentServerVerticle.class);
 
@@ -72,10 +72,11 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 			}
 		});
 
-		eventBus.registerHandler(address_init, new Handler<Message<JsonObject>>() {
+		eventBus.registerHandler(address_command, new Handler<Message<JsonObject>>() {
 
 			@Override
 			public void handle(Message<JsonObject> event) {
+				String method = event.body().getString("method");
 				String command = event.body().getString("command");
 				String agentId = event.body().getString("agentId");
 				JsonArray pathParameters = event.body().getArray("pathParameters");
@@ -95,7 +96,7 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 				Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 				handler.ifPresent(h -> {
 					logger.info("Found handler {} for command {}", h.info, command);
-					h.handler.onInitialize(agentId, command, pathParams, qParams, AgentServerVerticle.this);
+					h.handler.onCommand(agentId, method, command, pathParams, qParams, AgentServerVerticle.this);
 				});
 
 			}

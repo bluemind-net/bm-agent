@@ -35,6 +35,7 @@ public class RequestParser {
 	private static final Logger logger = LoggerFactory.getLogger(RequestParser.class);
 
 	public static Command parse(HttpServerRequest request) {
+		String method = request.method();
 		String path = request.path();
 		logger.info("Handling request to path {}", path);
 		if (path.startsWith("/")) {
@@ -60,17 +61,20 @@ public class RequestParser {
 			String value = entry.getValue();
 			queryMap.put(key, value);
 		}
-		return new Command(command, agentId, additionalParameters, queryMap);
+		return new Command(method, command, agentId, additionalParameters, queryMap);
 
 	}
 
 	public static class Command {
+		public final String method;
 		public final String command;
 		public final String agentId;
 		public final String[] pathParameters;
 		public final Map<String, String> queryParameters;
 
-		public Command(String command, String agentId, String[] pathParameters, Map<String, String> queryParameters) {
+		public Command(String method, String command, String agentId, String[] pathParameters,
+				Map<String, String> queryParameters) {
+			this.method = method;
 			this.command = command;
 			this.agentId = agentId;
 			this.pathParameters = pathParameters;
