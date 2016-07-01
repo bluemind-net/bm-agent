@@ -44,7 +44,7 @@ public class AgentServerModule implements BundleActivator {
 		PlatformManager pm = new DefaultPlatformManagerFactory().createPlatformManager();
 		VertxHolder.vertx = pm.vertx();
 		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServer", null, new URL[0], 1, null, null);
-		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServerVerticle", null, new URL[0], 10, null, null);
+		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServerVerticle", null, new URL[0], 1, null, null);
 
 	}
 
