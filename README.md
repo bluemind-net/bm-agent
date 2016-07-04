@@ -159,7 +159,7 @@ Maven pom
 ```
 plugin.xml
 ```  
-Plugin configuration (see Registering the client)    
+Plugin configuration [see Registering the client](#registering-the-client)    
 
 ##### Creating the client implementation
 
