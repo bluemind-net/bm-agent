@@ -25,7 +25,7 @@ Java 8 JDK
 
 ##### Building the application:
 
-Build the application. From the root folder:  
+##### Build the application.  From the root folder:  
 ```maven clean install```
 
 ##### Build the package:
