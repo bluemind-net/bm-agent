@@ -23,8 +23,6 @@ Java 8 JDK
 [Apache Maven 3](https://maven.apache.org/)  
 [Docker](https://www.docker.com/)
 
-##### Building the application:
-
 ##### Build the application.  From the root folder:  
 ```maven clean install```
 
