@@ -45,8 +45,8 @@ The server will search the configuration file using following path:
 /etc/bm/agent/server-config.json:
 ```javascript
 {
-		"listenerAddress" : "0.0.0.0",
-		"port" : 8086
+      "listenerAddress" : "0.0.0.0",
+      "port" : 8086
 }
 ```
 where ListenerAddress and port define the address and port the server should listen on.
@@ -56,9 +56,9 @@ The client will search the configuration file using following path:
 /etc/bm/agent/client-config.json:
 ```javascript
 {
-		"agentId" : "agent-idX",
-		"host" : "<server>",
-		"port" : 8086
+      "agentId" : "agent-idX",
+      "host" : "<server>",
+      "port" : 8086
 }
 ```
 where agentId is a unique client identifier and host and port define the server host and port.
@@ -146,9 +146,9 @@ net.bluemind.agent.client.AgentClientHandler
 ```Java
 public interface AgentClientHandler {
 
-	public void onInitialize(String command, ClientConnection connection);
+   public void onInitialize(String command, ClientConnection connection);
 
-	public void onMessage(byte[] data);
+   public void onMessage(byte[] data);
 
 }
 ```
@@ -190,10 +190,10 @@ net.bluemind.agent.server.AgentServerHandler
 ```Java
 public interface AgentServerHandler {
 
-	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
+   public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
 
-	public void onCommand(String agentId, String method, String command, List<String> pathParams,
-			Map<String, String> queryParameters, ServerConnection connection);
+   public void onCommand(String agentId, String method, String command, List<String> pathParams,
+         Map<String, String> queryParameters, ServerConnection connection);
 
 }
 ```
