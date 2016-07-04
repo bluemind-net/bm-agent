@@ -24,15 +24,21 @@ Java 8 JDK
 [Docker](https://www.docker.com/)
 
 ##### Build the application.  From the root folder
-```maven clean install```
+```
+maven clean install
+```
 
 ##### Build the package
 From the folder p2:  
-```maven clean install```
+```
+maven clean install
+```
 
 ##### Build the installers:
 From the folder packaging:  
-```maven clean install```
+```
+maven clean install
+```
 
 You will find the packages for Debian and RedHat in the folders  
 packaging/bm-agent-client/target/out  
@@ -73,8 +79,12 @@ Both server and client can be started by executing the init scripts
 # Logfiles
 
 You will find the generated logfiles under  
-```/var/log/bm-agent-client/```  
-```/var/log/bm-agent-server/```  
+```
+/var/log/bm-agent-client/
+```
+```
+/var/log/bm-agent-server/
+```  
 
 # Example - Port Redirecting
 
@@ -87,7 +97,9 @@ HTTP method: GET
 Path: /agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223 
 
 wget Example:
-```wget "http://<server>:8086/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"```
+```
+wget "http://<server>:8086/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
+```
 
 This will open port 2223 on the server side. all data written to this socket will be transfered to client agentId and send to port 2222 on host 192.168.1.1 on the client side.
 
@@ -100,13 +112,19 @@ You can disable a port redirection by calling the same URL using the HTTP method
 To develop a bm-agent plugin you will create 2 maven projects (client and server).
 The easiest way to setup all required dependencies and repositories is to reference the file global/pom.xml which includes all needed dependencies.
 Since the project uses Equinox as its target runtime, your pom.xml needs following packaging declaration:  
-```<packaging>eclipse-plugin</packaging>```  
+```
+<packaging>eclipse-plugin</packaging>
+```  
 
 Typically, your project will contain following folders and files:        
 
-```src/```   
+```
+src/
+```   
 The source files  
-```META-INF/MANIFEST.MF```  
+```
+META-INF/MANIFEST.MF
+```  
 The OSGI manifest file
 ```
 Manifest-Version: 1.0
@@ -122,7 +140,9 @@ Require-Bundle: org.eclipse.osgi,
  org.eclipse.core.runtime;bundle-version="3.11.1"
 ```
 
-```build.properties```  
+```
+build.properties
+```  
 Build properties configuration
 ```
 source.. = src/
@@ -131,10 +151,14 @@ bin.includes = META-INF/,\
                plugin.xml
 ```
 
-```pom.xml```  
+```
+pom.xml
+```  
 Maven pom
 
-```plugin.xml```  
+```
+plugin.xml
+```  
 Plugin configuration (see Registering the client)    
 
 ##### Creating the client implementation
@@ -153,9 +177,9 @@ public interface AgentClientHandler {
 }
 ```
 
-The method ```onInitialize``` will be called when your plugin is loaded. It provides you with a connection instance.
+The method ``` onInitialize ``` will be called when your plugin is loaded. It provides you with a connection instance.
 You will use this connection object to send messages to the server part of your plugin.  
-The method ```onMessage``` will be called when message from the server part of your plugin arrive.
+The method ``` onMessage ``` will be called when message from the server part of your plugin arrive.
 
 ##### Registering the client
 
@@ -198,8 +222,8 @@ public interface AgentServerHandler {
 }
 ```
 
-The method ```onMessage``` will be called when message from the client part of your plugin arrive.  
-The method ```onCommand``` will be called when REST messages for your plugin have been executed.
+The method ``` onMessage ``` will be called when message from the client part of your plugin arrive.  
+The method ``` onCommand ``` will be called when REST messages for your plugin have been executed.
 
 ##### Registering the server
 
@@ -222,26 +246,26 @@ You can attach your plugin extension in the file plugin.xml:
 
  ```
 
-```command``` defines a unique identifier used to connect your client and server plugins.
+``` command ``` defines a unique identifier used to connect your client and server plugins.
 It must be the same as used on the client plugin.   
-```impl``` is the full path (package+class) to your implementation.
+``` impl ``` is the full path (package+class) to your implementation.
 
 ##### Sending REST messages to your server plugin
 
 After your server plugin has been loaded, you can send REST messages via the URL:
 
-```http://<server>:<port>/<agentId>/<command>```
+``` http://<server>:<port>/<agentId>/<command> ```
 
 The server engine will call your plugin's onCommand method once it receives a command.
-You can extend the path as needed. Additional path parameters will be submitted within the List parameter ```pathParams```.
-URL Parameters will be submitted via the ```queryParameters``` Map object.
+You can extend the path as needed. Additional path parameters will be submitted within the List parameter ``` pathParams ```.
+URL Parameters will be submitted via the ``` queryParameters ``` Map object.
 
 ##### Deploying your plugin
 
 To deploy your plugin you simply need to place it in the folder   
-```/usr/share/bm-agent-client/extensions/```  
+``` /usr/share/bm-agent-client/extensions/ ```  
 respectively   
-```/usr/share/bm-agent-server/extensions/```  
+``` /usr/share/bm-agent-server/extensions/ ```  
 and restart the application
   
   
