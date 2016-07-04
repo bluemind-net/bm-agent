@@ -15,6 +15,8 @@ Afterwards, the bidirectional connection allows the server to control and access
 
 Additionally, The server side can be accessed via a REST API to send messages to registered plugins.
 
+![Overview](https://github.com/bluemind-net/bm-agent/blob/master/doc-img/bm-agent.png "Overview")
+
 # Installation
 
 ##### Prerequisites
