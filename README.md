@@ -93,3 +93,156 @@ This will open port 2223 on the server side. all data written to this socket wil
 
 You can disable a port redirection by calling the same URL using the HTTP method DELETE.
 
+# Developing a Plugin
+
+##### Creating the project
+
+To develop a bm-agent plugin you will create 2 maven projects (client and server).
+The easiest way to setup all required dependencies and repositories is to reference the file global/pom.xml which includes all needed dependencies.
+Since the project uses Equinox as its target runtime, your pom.xml needs following packaging declaration:  
+```<packaging>eclipse-plugin</packaging>```  
+
+Typically, your project will contain following folders and files:        
+
+```src/```   
+The source files  
+```META-INF/MANIFEST.MF```  
+The OSGI manifest file
+```
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: <your plugin name>
+Bundle-SymbolicName: <your plugin name>;singleton:=true
+Bundle-Version: 3.1.0.qualifier
+Bundle-Vendor: <you>
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.osgi,
+ net.bluemind.slf4j,
+ net.bluemind.bm-agent.common,
+ org.eclipse.core.runtime;bundle-version="3.11.1"
+```
+
+```build.properties```  
+Build properties configuration
+```
+source.. = src/
+bin.includes = META-INF/,\
+               .,\
+               plugin.xml
+```
+
+```pom.xml```  
+Maven pom
+
+```plugin.xml```  
+Plugin configuration (see Registering the client)    
+
+##### Creating the client implementation
+
+To communicate with the client engine, you need to create a class which implements 
+```
+net.bluemind.agent.client.AgentClientHandler
+```  
+```Java
+public interface AgentClientHandler {
+
+	public void onInitialize(String command, ClientConnection connection);
+
+	public void onMessage(byte[] data);
+
+}
+```
+
+The method ```onInitialize``` will be called when your plugin is loaded. It provides you with a connection instance.
+You will use this connection object to send messages to the server part of your plugin.  
+The method ```onMessage``` will be called when message from the server part of your plugin arrive.
+
+##### Registering the client
+
+bm-agent uses Eclipse Extension Points to lookup plugins during startup.
+You can attach your plugin extension in the file plugin.xml:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="net.bluemind.agent.client">
+      <handler
+            command="<command>"
+            impl="<your class implementing AgentClientHandler>"
+            name="A description">
+      </handler>
+   </extension>
+</plugin>
+
+ ```
+
+```command``` defines a unique identifier used to connect your client and server plugins.  
+```impl``` is the full path (package+class) to your implementation.
+
+##### Creating the server implementation
+
+To communicate with the server engine, you need to create a class which implements 
+```
+net.bluemind.agent.server.AgentServerHandler
+```  
+```Java
+public interface AgentServerHandler {
+
+	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
+
+	public void onCommand(String agentId, String method, String command, List<String> pathParams,
+			Map<String, String> queryParameters, ServerConnection connection);
+
+}
+```
+
+The method ```onMessage``` will be called when message from the client part of your plugin arrive.  
+The method ```onCommand``` will be called when REST messages for your plugin have been executed.
+
+##### Registering the server
+
+You can attach your plugin extension in the file plugin.xml:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="net.bluemind.agent.server">
+      <handler
+            command="<command>"
+            impl="<your class implementing AgentServerHandler>"
+            name="A description">
+      </handler>
+   </extension>
+</plugin>
+
+
+ ```
+
+```command``` defines a unique identifier used to connect your client and server plugins.
+It must be the same as used on the client plugin.   
+```impl``` is the full path (package+class) to your implementation.
+
+##### Sending REST messages to your server plugin
+
+After your server plugin has been loaded, you can send REST messages via the URL:
+
+```http://<server>:<port>/<agentId>/<command>```
+
+The server engine will call your plugin's onCommand method once it receives a command.
+You can extend the path as needed. Additional path parameters will be submitted within the List parameter ```pathParams```.
+URL Parameters will be submitted via the ```queryParameters``` Map object.
+
+##### Deploying your plugin
+
+To deploy your plugin you simply need to place it in the folder   
+```/usr/share/bm-agent-client/extensions/```  
+respectively   
+```/usr/share/bm-agent-server/extensions/```  
+and restart the application
+  
+  
+
