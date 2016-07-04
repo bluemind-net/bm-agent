@@ -66,8 +66,8 @@ where agentId is a unique client identifier and host and port define the server 
 
 Be sure to start the server before starting up the clients.
 Both server and client can be started by executing the init scripts  
-/etc/init.d/bm-agent-server  
-/etc/init.d/bm-agent-client
+/etc/init.d/bm-agent-server start  
+/etc/init.d/bm-agent-client start
 
 # Example - Port Redirecting:
 
