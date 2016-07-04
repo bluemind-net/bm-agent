@@ -20,14 +20,19 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent;
 
-import net.bluemind.agent.DoneHandler;
+public class NoopHandler implements DoneHandler {
 
-public interface ServerConnection {
+	private static final NoopHandler instance = new NoopHandler();
 
-	void send(String agentId, String command, byte[] data, DoneHandler doneHandler);
+	@Override
+	public void handle() {
 
-	void send(String agentId, String command, byte[] bytes);
+	}
+
+	public static NoopHandler getInstance() {
+		return instance;
+	}
 
 }

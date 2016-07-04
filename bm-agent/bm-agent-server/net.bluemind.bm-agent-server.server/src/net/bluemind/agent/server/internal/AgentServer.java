@@ -81,6 +81,7 @@ public class AgentServer extends Verticle {
 		}).listen(config.port, config.listenerAddress);
 
 		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
+			String commandId = event.body().getString("commandId");
 			String command = event.body().getString("command");
 			String agentId = event.body().getString("agentId");
 			byte[] data = event.body().getBinary("data");
@@ -92,6 +93,8 @@ public class AgentServer extends Verticle {
 			} else {
 				reply(command, agentId, data, con.get());
 			}
+			JsonObject obj = new JsonObject().putString("commandId", commandId);
+			vertx.eventBus().send(AgentServerVerticle.address_command_done, obj);
 		});
 
 	}

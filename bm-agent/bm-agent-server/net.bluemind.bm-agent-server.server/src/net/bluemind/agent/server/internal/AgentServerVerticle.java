@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ import org.vertx.java.platform.Verticle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.bluemind.agent.DoneHandler;
+import net.bluemind.agent.NoopHandler;
 import net.bluemind.agent.server.ServerConnection;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry.AgentHandler;
@@ -45,6 +49,9 @@ import net.bluemind.agent.server.internal.handler.HandlerRegistry.AgentHandler;
 public class AgentServerVerticle extends Verticle implements ServerConnection {
 	public static final String address = "agent.message";
 	public static String address_command = "agent.command";
+	public static String address_command_done = "agent.command.done";
+
+	private static final Map<String, DoneHandler> currentCommandMap = new ConcurrentHashMap<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(AgentServerVerticle.class);
 
@@ -92,16 +99,30 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 
 		});
 
+		eventBus.registerHandler(address_command_done, (Message<JsonObject> event) -> {
+			String commandId = event.body().getString("commandId");
+			currentCommandMap.get(commandId).handle();
+			currentCommandMap.remove(commandId);
+		});
+
 	}
 
 	@Override
-	public void send(String agentId, String command, byte[] data) {
+	public void send(String agentId, String command, byte[] data, DoneHandler doneHandler) {
+		String commandId = UUID.randomUUID().toString();
+		currentCommandMap.put(commandId, doneHandler);
 		JsonObject obj = new JsonObject() //
+				.putString("commandId", commandId) //
 				.putString("agentId", agentId) //
 				.putString("command", command) //
 				.putBinary("data", data) //
 				.asObject();
 		vertx.eventBus().send(AgentServer.address, obj);
+	}
+
+	@Override
+	public void send(String agentId, String command, byte[] bytes) {
+		send(agentId, command, bytes, NoopHandler.getInstance());
 	}
 
 }

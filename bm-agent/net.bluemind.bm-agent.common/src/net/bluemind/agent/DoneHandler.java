@@ -20,14 +20,10 @@
  * See LICENSE.txt
  * END LICENSE
  */
-package net.bluemind.agent.server;
+package net.bluemind.agent;
 
-import net.bluemind.agent.DoneHandler;
+public interface DoneHandler {
 
-public interface ServerConnection {
-
-	void send(String agentId, String command, byte[] data, DoneHandler doneHandler);
-
-	void send(String agentId, String command, byte[] bytes);
+	public void handle();
 
 }

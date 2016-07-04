@@ -108,12 +108,13 @@ public class Listener {
 
 			);
 			netSocket.dataHandler((Buffer buffer) -> {
+				netSocket.pause();
 				byte[] data = buffer.getBytes();
 				logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 						clientId);
 				logger.trace("data: {}", new String(data));
 				byte[] messageData = createMessage(data);
-				listener.connection.send(listener.agentId, listener.command, messageData);
+				listener.connection.send(listener.agentId, listener.command, messageData, () -> netSocket.resume());
 			});
 			netSocket.exceptionHandler((Throwable event) -> {
 				logger.warn("Error occured while talking to local client {}", clientId, event);
