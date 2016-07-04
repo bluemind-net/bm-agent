@@ -108,7 +108,7 @@ You can disable a port redirection by calling the same URL using the HTTP method
 # Developing a Plugin
 
 the easiest way to develop a plugin is to copy the very simple existing ping plugin and use it as a template.
-You will find the client and server part in the folders:  
+You will find the client and server parts in the folders:  
 ``` bm-agent/handlers/client/net.bluemind.bm-agent.client.ping/ ```  
 ``` bm-agent/handlers/server/net.bluemind.bm-agent.server.ping/ ```  
 
