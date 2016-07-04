@@ -1,3 +1,5 @@
+[logo]: https://avatars0.githubusercontent.com/u/13470640?v=3&s=200
+![Bluemind][logo]
 # bm-agent
 BlueMind remote agent
 
