@@ -15,7 +15,7 @@ Additionally, The server side can be accessed via a REST API to send messages to
 
 # Installation
 
-##### Prerequisites:
+##### Prerequisites
 
 To build the installation packages you need following tools installed on your system:
 
@@ -23,10 +23,10 @@ Java 8 JDK
 [Apache Maven 3](https://maven.apache.org/)  
 [Docker](https://www.docker.com/)
 
-##### Build the application.  From the root folder:  
+##### Build the application.  From the root folder
 ```maven clean install```
 
-##### Build the package:
+##### Build the package
 From the folder p2:  
 ```maven clean install```
 
@@ -38,9 +38,9 @@ You will find the packages for Debian and RedHat in the folders
 packaging/bm-agent-client/target/out  
 packaging/bm-agent-server/target/out
 
-# Configuration:
+# Configuration
 
-##### bm-agent-server:
+##### bm-agent-server
 The server will search the configuration file using following path:
 /etc/bm/agent/server-config.json:
 ```javascript
@@ -50,6 +50,7 @@ The server will search the configuration file using following path:
 }
 ```
 where ListenerAddress and port define the address and port the server should listen on.
+
 ##### bm-agent-client
 The client will search the configuration file using following path:
 /etc/bm/agent/client-config.json:
@@ -62,14 +63,20 @@ The client will search the configuration file using following path:
 ```
 where agentId is a unique client identifier and host and port define the server host and port.
 
-# Starting the applications:
+# Starting the application
 
 Be sure to start the server before starting up the clients.
 Both server and client can be started by executing the init scripts  
-/etc/init.d/bm-agent-server start  
-/etc/init.d/bm-agent-client start
+``` /etc/init.d/bm-agent-server start (stop, restart)```  
+``` /etc/init.d/bm-agent-client start (stop, restart)```
 
-# Example - Port Redirecting:
+# Logfiles
+
+You will find the generated logfiles under  
+```/var/log/bm-agent-client/```  
+```/var/log/bm-agent-server/```  
+
+# Example - Port Redirecting
 
 bm-agent comes packaged with a ready-to-use port redirecting plugin. The plugin allows you to expose a port in the internal network (client side)
 to a port on the server side.
