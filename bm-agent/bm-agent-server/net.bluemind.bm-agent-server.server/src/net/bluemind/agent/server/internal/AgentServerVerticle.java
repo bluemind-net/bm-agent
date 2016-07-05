@@ -68,7 +68,7 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 			byte[] data = event.body().getBinary("data");
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 			handler.ifPresent(h -> {
-				logger.info("Found handler {} for command {}", h.info, command);
+				logger.debug("Found handler {} for command {}", h.info, command);
 				h.handler.onMessage(agentId, command, data, AgentServerVerticle.this);
 			});
 		});
@@ -93,7 +93,7 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 			handler.ifPresent(h -> {
-				logger.info("Found handler {} for command {}", h.info, command);
+				logger.debug("Found handler {} for command {}", h.info, command);
 				h.handler.onCommand(agentId, method, command, pathParams, qParams, AgentServerVerticle.this);
 			});
 

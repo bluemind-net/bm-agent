@@ -22,8 +22,12 @@
  */
 package net.bluemind.agent.client;
 
+import net.bluemind.agent.DoneHandler;
+
 public interface ClientConnection {
 
 	public void send(String command, byte[] data);
+
+	public void send(String command, byte[] data, DoneHandler doneHandler);
 
 }

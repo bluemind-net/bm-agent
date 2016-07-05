@@ -68,14 +68,15 @@ public class ConnectionHandler {
 				socket.dataHandler(new Handler<Buffer>() {
 					public void handle(Buffer event) {
 						byte[] data = event.getBytes();
-						logger.info("Received {} bytes from local server, redirecting to agent-server: {}", data.length,
-								clientId);
+						socket.pause();
+						logger.debug("Received {} bytes from local server, redirecting to agent-server: {}",
+								data.length, clientId);
 						logger.trace("data: {}", new String(data));
 						byte[] messageData = new JsonObject() //
 								.putNumber("client-port", clientPort) //
 								.putString("client-id", clientId) //
 								.putBinary("data", data).asObject().encode().getBytes();
-						connection.send(messageData);
+						connection.send(messageData, () -> socket.resume());
 
 					}
 				});

@@ -34,7 +34,7 @@ public class PingClientHandler implements AgentClientHandler {
 
 	@Override
 	public void onMessage(byte[] data) {
-		logger.info("Got a message: {}", new String(data));
+		logger.debug("Got a message: {}", new String(data));
 	}
 
 	@Override
@@ -42,17 +42,21 @@ public class PingClientHandler implements AgentClientHandler {
 		ping(command, connection);
 		new Thread(() -> {
 			while (true) {
-				try {
-					Thread.sleep(30000);
-				} catch (InterruptedException e) {
-				}
+				sleep(30000);
 				ping(command, connection);
 			}
 		}).start();
 	}
 
+	private void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+		}
+	}
+
 	private void ping(String command, ClientConnection connection) {
-		logger.info("Pinging server");
+		logger.debug("Pinging server");
 		try {
 			connection.send(command, "ping".getBytes());
 		} catch (Exception e) {

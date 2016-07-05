@@ -69,7 +69,7 @@ public class AgentServer extends Verticle {
 			logger.info("Connection to websocket established from client: {}",
 					ws.remoteAddress().getAddress().toString());
 			ws.dataHandler(data -> {
-				logger.info("Read {} bytes from websocket", data.length());
+				logger.trace("Read {} bytes from websocket", data.length());
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
@@ -86,7 +86,7 @@ public class AgentServer extends Verticle {
 			String agentId = event.body().getString("agentId");
 			byte[] data = event.body().getBinary("data");
 
-			logger.info("handling reply to client {}, command: {}", agentId, command);
+			logger.debug("handling reply to client {}, command: {}", agentId, command);
 			Optional<ServerWebSocket> con = ConnectionRegistry.getInstance().get(agentId);
 			if (!con.isPresent()) {
 				logger.warn("Cannot send message to client {}, command: {}. Agent is not connected", agentId, command);
@@ -105,7 +105,7 @@ public class AgentServer extends Verticle {
 		message.setData(data);
 		try {
 			Buffer buffer = new Buffer(parser.write(message));
-			logger.info("Writing {} bytes to websocket", buffer.length());
+			logger.trace("Writing {} bytes to websocket", buffer.length());
 			con.write(buffer);
 		} catch (Exception e) {
 			logger.warn("Cannot send reply to client {}", agentId, e);
@@ -115,7 +115,7 @@ public class AgentServer extends Verticle {
 	private void handleMessage(ServerWebSocket ws, String value) {
 		try {
 			BmMessage message = parser.read(value);
-			logger.info("Incoming Message: {}", message);
+			logger.debug("Incoming Message: {}", message);
 
 			JsonObject obj = new JsonObject() //
 					.putString("agentId", message.getAgentId()) //

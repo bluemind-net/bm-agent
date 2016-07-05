@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
+import net.bluemind.agent.DoneHandler;
 import net.bluemind.agent.client.AgentClientHandler;
 import net.bluemind.agent.client.ClientConnection;
 
@@ -41,7 +42,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 	@Override
 	public void onMessage(byte[] data) {
 
-		logger.info("Received a port redirect message containing {} bytes", data.length);
+		logger.debug("Received a port redirect message containing {} bytes", data.length);
 
 		JsonObject obj = new JsonObject(new String(data));
 		String serverHost = obj.getString("server-host");
@@ -54,7 +55,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 
 		ConnectionHandler handler = null;
 		if (handlers.containsKey(clientId)) {
-			logger.info("handler for id {} is already connected", clientId);
+			logger.debug("handler for id {} is already connected", clientId);
 			handler = handlers.get(clientId);
 			if (new String(value).equals("ack/end")) {
 				handler.disconnect();
@@ -94,17 +95,22 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 			this.command = command;
 		}
 
-		public void send(byte[] data) {
-			send(this.command, data);
+		public void send(byte[] data, DoneHandler doneHandler) {
+			send(this.command, data, doneHandler);
 		}
 
 		@Override
 		public void send(String command, byte[] data) {
-			connection.send(command, data);
+			throw new UnsupportedOperationException("Usage of DoneHandler to manage backpressure is required");
 		}
 
 		public void remove(String clientId) {
 			PortRedirectClientHandler.handlers.remove(clientId);
+		}
+
+		@Override
+		public void send(String command, byte[] data, DoneHandler doneHandler) {
+			connection.send(command, data, doneHandler);
 		}
 
 	}

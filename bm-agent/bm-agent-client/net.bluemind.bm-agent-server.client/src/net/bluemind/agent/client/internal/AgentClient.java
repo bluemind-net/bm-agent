@@ -62,14 +62,18 @@ public class AgentClient extends Verticle {
 	public void start() {
 		logger.info("Starting BM Agent Client");
 		config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
+		registerHandlers();
 		connect();
 
 		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
 			String command = event.body().getString("command");
+			String commandId = event.body().getString("commandId");
 			byte[] data = event.body().getBinary("data");
 
-			logger.info("handling message to server {}, command: {}", config.agentId, command);
+			logger.debug("handling message to server {}, command: {}", config.agentId, command);
 			send(command, data);
+			JsonObject obj = new JsonObject().putString("commandId", commandId);
+			vertx.eventBus().send(AgentClientVerticle.address_command_done, obj);
 		});
 
 	}
@@ -82,7 +86,7 @@ public class AgentClient extends Verticle {
 		try {
 			Buffer dataBuffer = new Buffer(parser.write(message));
 			if (connected) {
-				logger.info("Writing {} bytes to websocket", dataBuffer.length());
+				logger.trace("Writing {} bytes to websocket", dataBuffer.length());
 				ws.write(dataBuffer);
 			} else {
 				logger.info("Lost connection to server... trying to reconnect", dataBuffer.length());
@@ -106,7 +110,7 @@ public class AgentClient extends Verticle {
 			connected = true;
 			this.ws = ws;
 			ws.dataHandler(data -> {
-				logger.info("Read {} bytes from websocket", data.length());
+				logger.trace("Read {} bytes from websocket", data.length());
 				String value = new String(data.getBytes());
 				handleMessage(ws, value);
 			});
@@ -114,18 +118,20 @@ public class AgentClient extends Verticle {
 				connected = false;
 				connect();
 			});
-			registerHandlers();
+			// register the agent by sending a message
+			send("ping", "ping".getBytes());
 		}));
+
 	}
 
 	private void handleMessage(WebSocket ws, String value) {
 		try {
 			BmMessage message = parser.read(value);
 			message.setAgentId(config.agentId);
-			logger.info("Incoming Message: {}", message);
+			logger.debug("Incoming Message: {}", message);
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(message.getCommand());
 			handler.ifPresent(h -> {
-				logger.info("Found handler {} for command {}", h.info, message.getCommand());
+				logger.debug("Found handler {} for command {}", h.info, message.getCommand());
 				h.handler.onMessage(message.getData());
 			});
 		} catch (Exception e) {

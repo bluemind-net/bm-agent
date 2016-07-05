@@ -22,7 +22,10 @@
  */
 package net.bluemind.agent.client.internal;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +34,8 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
+import net.bluemind.agent.DoneHandler;
+import net.bluemind.agent.NoopHandler;
 import net.bluemind.agent.client.ClientConnection;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
@@ -38,7 +43,9 @@ import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
 public class AgentClientVerticle extends Verticle implements ClientConnection {
 	public static final String address_init = "agent.init";
 	public static final String address_message = "agent.message";
+	public static String address_command_done = "agent.command.done";
 
+	private static final Map<String, DoneHandler> currentCommandMap = new ConcurrentHashMap<>();
 	private static final Logger logger = LoggerFactory.getLogger(AgentClientVerticle.class);
 
 	@Override
@@ -51,7 +58,7 @@ public class AgentClientVerticle extends Verticle implements ClientConnection {
 			String command = event.body().getString("command");
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 			handler.ifPresent(h -> {
-				logger.info("Found handler {} for command {}", h.info, command);
+				logger.debug("Found handler {} for command {}", h.info, command);
 				h.handler.onInitialize(command, AgentClientVerticle.this);
 			});
 
@@ -62,18 +69,32 @@ public class AgentClientVerticle extends Verticle implements ClientConnection {
 			byte[] data = event.body().getBinary("data");
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 			handler.ifPresent(h -> {
-				logger.info("Found handler {} for command {}", h.info, command);
+				logger.debug("Found handler {} for command {}", h.info, command);
 				h.handler.onMessage(data);
 			});
 
+		});
+
+		eventBus.registerHandler(address_command_done, (Message<JsonObject> event) -> {
+			String commandId = event.body().getString("commandId");
+			currentCommandMap.get(commandId).handle();
+			currentCommandMap.remove(commandId);
 		});
 
 	}
 
 	@Override
 	public void send(String command, byte[] data) {
+		send(command, data, NoopHandler.getInstance());
+	}
+
+	@Override
+	public void send(String command, byte[] data, DoneHandler doneHandler) {
+		String commandId = UUID.randomUUID().toString();
+		currentCommandMap.put(commandId, doneHandler);
 		JsonObject obj = new JsonObject() //
 				.putString("command", command) //
+				.putString("commandId", commandId) //
 				.putBinary("data", data) //
 				.asObject();
 		vertx.eventBus().send(AgentClient.address, obj);

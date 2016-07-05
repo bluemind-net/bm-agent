@@ -26,10 +26,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.http.ServerWebSocket;
 
 public class ConnectionRegistry {
 
+	private static final Logger logger = LoggerFactory.getLogger(ConnectionRegistry.class);
 	private Map<String, ServerWebSocket> connections;
 
 	private ConnectionRegistry() {
@@ -41,6 +44,9 @@ public class ConnectionRegistry {
 	}
 
 	public void register(String id, ServerWebSocket connection) {
+		if (!connections.containsKey(id)) {
+			logger.info("Registering client agent {}", id);
+		}
 		connections.put(id, connection);
 	}
 

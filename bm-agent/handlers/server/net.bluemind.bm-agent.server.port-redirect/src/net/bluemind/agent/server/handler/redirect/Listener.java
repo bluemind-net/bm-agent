@@ -73,7 +73,7 @@ public class Listener {
 	}
 
 	public void receive(String clientId, byte[] value) {
-		logger.info("Writing to server {}:{} bytes", clientId, value.length);
+		logger.debug("Writing to server {}:{} bytes", clientId, value.length);
 		serverHandlers.get(clientId).write(new Buffer(value));
 	}
 
@@ -110,7 +110,7 @@ public class Listener {
 			netSocket.dataHandler((Buffer buffer) -> {
 				netSocket.pause();
 				byte[] data = buffer.getBytes();
-				logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
+				logger.debug("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 						clientId);
 				logger.trace("data: {}", new String(data));
 				byte[] messageData = createMessage(data);
