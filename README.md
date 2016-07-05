@@ -119,18 +119,27 @@ You will find the client and server parts in the folders:
 ##### Creating the project
 
 To develop a bm-agent plugin you will create 2 maven projects (client and server).
-The easiest way to setup all required dependencies and repositories is to reference the file global/pom.xml which includes all needed dependencies.
+The easiest way to setup all required dependencies and repositories is to reference the file ` global/pom.xml ` which includes all needed dependencies.
 Since the project uses Equinox as its target runtime, your pom.xml needs following packaging declaration:  
 ```
 <packaging>eclipse-plugin</packaging>
 ```  
 
-Typically, your project will contain following folders and files:        
+Typically, your project will contain following folders and files:    
+
++ src/
++ META-INF/MANIFEST.MF 
++ build.properties
++ pom.xml
++ plugin.xml
+
+___
 
 ```
 src/
 ```   
 The source files  
+___
 ```
 META-INF/MANIFEST.MF
 ```  
@@ -148,7 +157,7 @@ Require-Bundle: org.eclipse.osgi,
  net.bluemind.bm-agent.common,
  org.eclipse.core.runtime;bundle-version="3.11.1"
 ```
-
+___
 ```
 build.properties
 ```  
@@ -159,12 +168,12 @@ bin.includes = META-INF/,\
                .,\
                plugin.xml
 ```
-
+___
 ```
 pom.xml
 ```  
 Maven pom
-
+___
 ```
 plugin.xml
 ```  
@@ -256,7 +265,7 @@ You can attach your plugin extension in the file plugin.xml:
  ```
 
 ``` command ``` defines a unique identifier used to connect your client and server plugins.
-It must be the same as used on the client plugin.   
+It must be the same as used by the client plugin.   
 ``` impl ``` is the full path (package+class) to your implementation.
 
 ##### Sending REST messages to your server plugin
