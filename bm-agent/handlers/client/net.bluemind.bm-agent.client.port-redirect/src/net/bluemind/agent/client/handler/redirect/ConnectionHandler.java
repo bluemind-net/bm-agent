@@ -90,7 +90,8 @@ public class ConnectionHandler {
 				}
 				connected = true;
 			} else {
-				logger.warn("Cannot connect to server {}:{}", serverHost, serverDestPort, asyncResult.cause());
+				logger.warn("Cannot connect to server {}:{}:{}", serverHost, serverDestPort,
+						asyncResult.cause().getMessage());
 			}
 
 		});
@@ -106,11 +107,11 @@ public class ConnectionHandler {
 
 	public void write(byte[] value) {
 		if (new String(value).equals("pause")) {
-			logger.info("Server signalized a full queue, Stopping stream");
+			logger.debug("Server signalized a full queue, Stopping stream");
 			socket.pause();
 		} else {
 			if (new String(value).equals("resume")) {
-				logger.info("Server is ready to write, Resuming stream");
+				logger.debug("Server is ready to write, Resuming stream");
 				socket.resume();
 			} else {
 				this.buffer.appendBuffer(new Buffer(value));
@@ -129,12 +130,12 @@ public class ConnectionHandler {
 			}
 			buffer = new Buffer();
 			if (socket.writeQueueFull()) {
-				logger.info("Write queue to port {}:{} is full, pausing stream", serverHost, serverDestPort);
+				logger.debug("Write queue to port {}:{} is full, pausing stream", serverHost, serverDestPort);
 				stopped = true;
 				byte[] stopMesssage = createMessage("pause".getBytes());
 				connection.send(stopMesssage);
 				socket.drainHandler((Void event) -> {
-					logger.info("Resuming stream to write queue {}:{}", serverHost, serverDestPort);
+					logger.debug("Resuming stream to write queue {}:{}", serverHost, serverDestPort);
 					stopped = false;
 					byte[] resumeMessage = createMessage("resume".getBytes());
 					connection.send(resumeMessage);
@@ -145,7 +146,9 @@ public class ConnectionHandler {
 	}
 
 	public void disconnect() {
-		socket.close();
+		if (null != socket) {
+			socket.close();
+		}
 		connection.remove(this.clientId);
 	}
 

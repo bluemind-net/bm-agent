@@ -49,7 +49,11 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 
 		logger.debug("Received data for from client-agent for client port {}, id: {}", clientPort, clientId);
 		logger.trace("data: {}", new String(value));
-		localServers.get(clientPort).receive(clientId, value);
+		if (!localServers.containsKey(clientPort)) {
+			logger.warn("Client talks to non-existing Port handler: {}", clientPort);
+		} else {
+			localServers.get(clientPort).receive(clientId, value);
+		}
 
 	}
 

@@ -57,22 +57,24 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 		if (handlers.containsKey(clientId)) {
 			logger.debug("handler for id {} is already connected", clientId);
 			handler = handlers.get(clientId);
-			if (new String(value).equals("ack/end")) {
+			if (new String(value).contains("ack/end")) {
 				handler.disconnect();
 			}
 		} else {
 			logger.info("handler for id {} is not connected yet", clientId);
-			handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort);
-			try {
-				handler.connect();
-				logger.info("Connected to {}:{}", serverHost, serverDestPort);
-			} catch (Exception e) {
-				logger.warn("Cannot connect to remote server", e);
+			if (!new String(value).contains("ack/end")) {
+				handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort);
+				try {
+					handler.connect();
+					logger.info("Connected to {}:{}", serverHost, serverDestPort);
+				} catch (Exception e) {
+					logger.warn("Cannot connect to remote server", e);
+				}
+				handlers.put(clientId, handler);
 			}
-			handlers.put(clientId, handler);
 		}
 
-		if (!new String(value).equals("syn/ack")) {
+		if (!new String(value).equals("syn/ack") && !new String(value).equals("ack/end")) {
 			handler.write(value);
 		}
 
