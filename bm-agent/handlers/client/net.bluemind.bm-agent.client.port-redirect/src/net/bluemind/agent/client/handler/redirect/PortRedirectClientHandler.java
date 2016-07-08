@@ -49,6 +49,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 		int serverDestPort = obj.getInteger("server-dest-port");
 		int clientPort = obj.getInteger("client-port");
 		String clientId = obj.getString("client-id");
+		String control = obj.getString("control");
 		byte[] value = obj.getBinary("data");
 
 		logger.trace("data: {}", new String(value));
@@ -57,12 +58,12 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 		if (handlers.containsKey(clientId)) {
 			logger.debug("handler for id {} is already connected", clientId);
 			handler = handlers.get(clientId);
-			if (new String(value).contains("ack/end")) {
+			if (control.equals("ack/end")) {
 				handler.disconnect();
 			}
 		} else {
 			logger.info("handler for id {} is not connected yet", clientId);
-			if (!new String(value).contains("ack/end")) {
+			if (!control.equals("ack/end")) {
 				handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort);
 				try {
 					handler.connect();
@@ -74,8 +75,8 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 			}
 		}
 
-		if (!new String(value).equals("syn/ack") && !new String(value).equals("ack/end")) {
-			handler.write(value);
+		if (!control.equals("syn/ack") && !control.equals("ack/end")) {
+			handler.write(control, value);
 		}
 
 	}

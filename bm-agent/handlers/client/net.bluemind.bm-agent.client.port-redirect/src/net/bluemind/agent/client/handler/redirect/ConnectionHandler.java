@@ -72,7 +72,7 @@ public class ConnectionHandler {
 						logger.debug("Received {} bytes from local server, redirecting to agent-server: {}",
 								data.length, clientId);
 						logger.trace("data: {}", new String(data));
-						byte[] messageData = createMessage(data);
+						byte[] messageData = createMessage(data, "");
 						connection.send(messageData);
 
 					}
@@ -97,20 +97,21 @@ public class ConnectionHandler {
 		});
 	}
 
-	private byte[] createMessage(byte[] data) {
+	private byte[] createMessage(byte[] data, String control) {
 		byte[] messageData = new JsonObject() //
 				.putNumber("client-port", clientPort) //
 				.putString("client-id", clientId) //
+				.putString("control", control) //
 				.putBinary("data", data).asObject().encode().getBytes();
 		return messageData;
 	}
 
-	public void write(byte[] value) {
-		if (new String(value).equals("pause")) {
+	public void write(String control, byte[] value) {
+		if (control.equals("pause")) {
 			logger.debug("Server signalized a full queue, Stopping stream");
 			socket.pause();
 		} else {
-			if (new String(value).equals("resume")) {
+			if (control.equals("resume")) {
 				logger.debug("Server is ready to write, Resuming stream");
 				socket.resume();
 			} else {
@@ -132,12 +133,12 @@ public class ConnectionHandler {
 			if (socket.writeQueueFull()) {
 				logger.debug("Write queue to port {}:{} is full, pausing stream", serverHost, serverDestPort);
 				stopped = true;
-				byte[] stopMesssage = createMessage("pause".getBytes());
+				byte[] stopMesssage = createMessage("".getBytes(), "pause");
 				connection.send(stopMesssage);
 				socket.drainHandler((Void event) -> {
 					logger.debug("Resuming stream to write queue {}:{}", serverHost, serverDestPort);
 					stopped = false;
-					byte[] resumeMessage = createMessage("resume".getBytes());
+					byte[] resumeMessage = createMessage("".getBytes(), "resume");
 					connection.send(resumeMessage);
 					tryWrite();
 				});

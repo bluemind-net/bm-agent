@@ -72,12 +72,12 @@ public class Listener {
 		server.close();
 	}
 
-	public void receive(String clientId, byte[] value) {
+	public void receive(String clientId, byte[] value, String control) {
 		logger.debug("Writing to server {}:{} bytes", clientId, value.length);
 		if (!serverHandlers.containsKey(clientId)) {
 			logger.warn("Client tries to talk to non-existing server: {}", clientId);
 		} else {
-			serverHandlers.get(clientId).write(value);
+			serverHandlers.get(clientId).write(value, control);
 		}
 	}
 
@@ -98,14 +98,14 @@ public class Listener {
 		}
 
 		public void init() {
-			byte[] messageData = createMessage("syn/ack".getBytes());
+			byte[] messageData = createMessage("".getBytes(), "syn/ack");
 			listener.connection.send(listener.agentId, listener.command, messageData);
 		}
 
 		private void setupHandlers() {
 			netSocket.closeHandler((Void event) -> {
 				logger.info("Disconnecting from local client {}", clientId);
-				byte[] messageData = createMessage("ack/end".getBytes());
+				byte[] messageData = createMessage("".getBytes(), "ack/end");
 				listener.connection.send(listener.agentId, listener.command, messageData);
 				listener.remove(clientId);
 			}
@@ -116,20 +116,23 @@ public class Listener {
 				logger.debug("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 						clientId);
 				logger.trace("data: {}", new String(data));
-				byte[] messageData = createMessage(data);
+				byte[] messageData = createMessage(data, "");
 				listener.connection.send(listener.agentId, listener.command, messageData);
 			});
 			netSocket.exceptionHandler((Throwable event) -> {
-				logger.warn("Error occured while talking to local client {}", clientId, event);
+				logger.warn("Error occured while talking to local client {}:{}. Client may have disconnected", clientId,
+						event.getMessage());
+				logger.trace("Error", event);
 			});
 		}
 
-		private byte[] createMessage(byte[] data) {
+		private byte[] createMessage(byte[] data, String control) {
 			byte[] messageData = new JsonObject() //
 					.putString("server-host", listener.hostPortConfig.serverHost) //
 					.putNumber("server-dest-port", listener.hostPortConfig.remotePort) //
 					.putNumber("client-port", listener.hostPortConfig.localPort) //
 					.putString("client-id", clientId) //
+					.putString("control", control) //
 					.putBinary("data", data).asObject().encode().getBytes();
 			return messageData;
 		}
@@ -143,12 +146,12 @@ public class Listener {
 				if (netSocket.writeQueueFull()) {
 					logger.debug("Write queue to port {} is full, pausing stream", listener.hostPortConfig.localPort);
 					stopped = true;
-					byte[] stopMesssage = createMessage("pause".getBytes());
+					byte[] stopMesssage = createMessage("".getBytes(), "pause");
 					listener.connection.send(listener.agentId, listener.command, stopMesssage);
 					netSocket.drainHandler((Void event) -> {
 						logger.debug("Resuming stream to write queue on port {}", listener.hostPortConfig.localPort);
 						stopped = false;
-						byte[] resumeMessage = createMessage("resume".getBytes());
+						byte[] resumeMessage = createMessage("".getBytes(), "resume");
 						listener.connection.send(listener.agentId, listener.command, resumeMessage);
 						tryWrite();
 					});
@@ -156,12 +159,12 @@ public class Listener {
 			}
 		}
 
-		public void write(byte[] value) {
-			if (new String(value).equals("pause")) {
+		public void write(byte[] value, String control) {
+			if (control.equals("pause")) {
 				logger.debug("Client signalized a full queue, Stopping stream");
 				netSocket.pause();
 			} else {
-				if (new String(value).equals("resume")) {
+				if (control.equals("resume")) {
 					logger.debug("Client is ready to write, Resuming stream");
 					netSocket.resume();
 				} else {
