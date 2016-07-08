@@ -114,7 +114,9 @@ public class ConnectionHandler {
 				socket.resume();
 			} else {
 				this.buffer.appendBuffer(new Buffer(value));
-				tryWrite();
+				if (connected) {
+					tryWrite();
+				}
 			}
 		}
 
