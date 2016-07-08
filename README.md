@@ -6,6 +6,7 @@ BlueMind remote agent
 # Description
 bm-agent is an extensible client-server application.
 It provides the connection management between the server and multiple clients via a Websocket connection.
+bm-agent uses this Websocket connection to multiplex all connections between client and server plugins.
 
 Plugins on both client and server side can be registered via Eclipse Extension Points.
 
