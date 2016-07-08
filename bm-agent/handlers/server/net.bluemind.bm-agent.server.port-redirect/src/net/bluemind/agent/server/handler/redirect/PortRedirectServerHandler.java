@@ -89,10 +89,15 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		int port = Integer.parseInt(queryParameters.get("port"));
 		int localPort = Integer.parseInt(queryParameters.get("localPort"));
 
-		logger.info("Initializing Port Redirection. LocalPort: {}, Host: {}, Port: {}", localPort, host, port);
-
 		HostPortConfig hostPortConfig = new HostPortConfig(host, port, localPort);
 
+		if (localServers.containsKey(hostPortConfig.localPort)) {
+			logger.info("Skipping Port Redirection. Redirection is already active. LocalPort: {}, Host: {}, Port: {}",
+					localPort, host, port);
+			return;
+		}
+
+		logger.info("Initializing Port Redirection. LocalPort: {}, Host: {}, Port: {}", localPort, host, port);
 		Listener listener = new Listener(agentId, command, connection, hostPortConfig);
 		localServers.put(hostPortConfig.localPort, listener);
 		try {
