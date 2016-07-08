@@ -1,0 +1,6 @@
+1. on client side, run:
+ $ cat /dev/urandom |base64|nc -l -q -1 -p 10000
+2. on server side, redirect port 10000 to local 10001:
+ $ curl 'http://localhost:8086/customer-name/port-redirect?port=10000&host=127.0.0.1&localPort=10001'
+3. on server side, use slowRead.py
+ $ /path/to/slowRead.py
