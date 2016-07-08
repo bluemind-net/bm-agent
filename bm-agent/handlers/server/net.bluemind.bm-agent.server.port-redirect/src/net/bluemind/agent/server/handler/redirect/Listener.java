@@ -74,7 +74,7 @@ public class Listener {
 
 	public void receive(String clientId, byte[] value) {
 		logger.debug("Writing to server {}:{} bytes", clientId, value.length);
-		serverHandlers.get(clientId).write(new Buffer(value));
+		serverHandlers.get(clientId).write(value);
 	}
 
 	public static class ServerHandler {
@@ -108,13 +108,12 @@ public class Listener {
 
 			);
 			netSocket.dataHandler((Buffer buffer) -> {
-				netSocket.pause();
 				byte[] data = buffer.getBytes();
 				logger.debug("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 						clientId);
 				logger.trace("data: {}", new String(data));
 				byte[] messageData = createMessage(data);
-				listener.connection.send(listener.agentId, listener.command, messageData, () -> netSocket.resume());
+				listener.connection.send(listener.agentId, listener.command, messageData);
 			});
 			netSocket.exceptionHandler((Throwable event) -> {
 				logger.warn("Error occured while talking to local client {}", clientId, event);
@@ -133,20 +132,40 @@ public class Listener {
 
 		protected void tryWrite() {
 			if (!stopped) {
-				netSocket.write(readBuffer);
+				if (readBuffer.length() > 0) {
+					netSocket.write(readBuffer);
+				}
 				readBuffer = new Buffer();
 				if (netSocket.writeQueueFull()) {
+					logger.info("Write queue to port {} is full, pausing stream", listener.hostPortConfig.localPort);
 					stopped = true;
+					byte[] stopMesssage = createMessage("pause".getBytes());
+					listener.connection.send(listener.agentId, listener.command, stopMesssage);
 					netSocket.drainHandler((Void event) -> {
+						logger.info("Resuming stream to write queue on port {}", listener.hostPortConfig.localPort);
 						stopped = false;
+						byte[] resumeMessage = createMessage("resume".getBytes());
+						listener.connection.send(listener.agentId, listener.command, resumeMessage);
+						tryWrite();
 					});
 				}
 			}
 		}
 
-		public void write(Buffer data) {
-			readBuffer.appendBuffer(data);
-			tryWrite();
+		public void write(byte[] value) {
+			if (new String(value).equals("pause")) {
+				logger.info("Client signalized a full queue, Stopping stream");
+				netSocket.pause();
+			} else {
+				if (new String(value).equals("resume")) {
+					logger.info("Client is ready to write, Resuming stream");
+					netSocket.resume();
+				} else {
+					readBuffer.appendBuffer(new Buffer(value));
+					tryWrite();
+				}
+			}
+
 		}
 
 	}

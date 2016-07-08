@@ -51,6 +51,7 @@ public class AgentClient extends Verticle {
 	private final MessageParser parser;
 	private ClientConfig config;
 	private boolean connected = false;
+	private boolean connecting = false;
 
 	private final Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
@@ -89,8 +90,10 @@ public class AgentClient extends Verticle {
 				logger.trace("Writing {} bytes to websocket", dataBuffer.length());
 				ws.write(dataBuffer);
 			} else {
-				logger.info("Lost connection to server... trying to reconnect", dataBuffer.length());
-				connect();
+				if (!connecting && command.equals("ping")) {
+					logger.info("Lost connection to server...Trying to reconnect");
+					connect();
+				}
 			}
 		} catch (Exception e) {
 			logger.warn("Cannot send reply to server", e);
@@ -99,14 +102,21 @@ public class AgentClient extends Verticle {
 
 	private void connect() {
 		logger.info("Connecting to {}:{}", config.host, config.port);
+		connecting = true;
 
 		HttpClient client = vertx.createHttpClient() //
 				.setMaxWebSocketFrameSize(WS_FRAMESIZE) //
 				.setHost(config.host) //
 				.setPort(config.port);
 
+		client.exceptionHandler((t) -> {
+			logger.warn("Error on Connection: {}", t.getMessage());
+			connecting = false;
+		});
+
 		client.connectWebsocket("/", (ws -> {
 			logger.info("Connected to websocket");
+			connecting = false;
 			connected = true;
 			this.ws = ws;
 			ws.dataHandler(data -> {
@@ -117,6 +127,9 @@ public class AgentClient extends Verticle {
 			ws.closeHandler((v) -> {
 				connected = false;
 				connect();
+			});
+			ws.exceptionHandler((t) -> {
+				logger.warn("Error on Websocket: {}", t.getMessage());
 			});
 			// register the agent by sending a message
 			send("ping", "ping".getBytes());

@@ -44,6 +44,7 @@ public class ConnectionHandler {
 	protected final String serverHost;
 	private Buffer buffer = new Buffer();
 	NetSocket socket;
+	boolean stopped;
 	private boolean connected = false;
 
 	private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
@@ -68,15 +69,11 @@ public class ConnectionHandler {
 				socket.dataHandler(new Handler<Buffer>() {
 					public void handle(Buffer event) {
 						byte[] data = event.getBytes();
-						socket.pause();
 						logger.debug("Received {} bytes from local server, redirecting to agent-server: {}",
 								data.length, clientId);
 						logger.trace("data: {}", new String(data));
-						byte[] messageData = new JsonObject() //
-								.putNumber("client-port", clientPort) //
-								.putString("client-id", clientId) //
-								.putBinary("data", data).asObject().encode().getBytes();
-						connection.send(messageData, () -> socket.resume());
+						byte[] messageData = createMessage(data);
+						connection.send(messageData);
 
 					}
 				});
@@ -99,12 +96,49 @@ public class ConnectionHandler {
 		});
 	}
 
+	private byte[] createMessage(byte[] data) {
+		byte[] messageData = new JsonObject() //
+				.putNumber("client-port", clientPort) //
+				.putString("client-id", clientId) //
+				.putBinary("data", data).asObject().encode().getBytes();
+		return messageData;
+	}
+
 	public void write(byte[] value) {
-		Buffer data = new Buffer(value);
-		if (connected) {
-			socket.write(data);
+		if (new String(value).equals("pause")) {
+			logger.info("Server signalized a full queue, Stopping stream");
+			socket.pause();
 		} else {
-			this.buffer.appendBuffer(data);
+			if (new String(value).equals("resume")) {
+				logger.info("Server is ready to write, Resuming stream");
+				socket.resume();
+			} else {
+				this.buffer.appendBuffer(new Buffer(value));
+				tryWrite();
+			}
+		}
+
+	}
+
+	protected void tryWrite() {
+		if (!stopped) {
+			if (buffer.length() > 0) {
+				socket.write(buffer);
+			}
+			buffer = new Buffer();
+			if (socket.writeQueueFull()) {
+				logger.info("Write queue to port {}:{} is full, pausing stream", serverHost, serverDestPort);
+				stopped = true;
+				byte[] stopMesssage = createMessage("pause".getBytes());
+				connection.send(stopMesssage);
+				socket.drainHandler((Void event) -> {
+					logger.info("Resuming stream to write queue {}:{}", serverHost, serverDestPort);
+					stopped = false;
+					byte[] resumeMessage = createMessage("resume".getBytes());
+					connection.send(resumeMessage);
+					tryWrite();
+				});
+			}
 		}
 	}
 

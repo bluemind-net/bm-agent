@@ -95,13 +95,13 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 			this.command = command;
 		}
 
-		public void send(byte[] data, DoneHandler doneHandler) {
-			send(this.command, data, doneHandler);
+		public void send(byte[] data) {
+			send(this.command, data);
 		}
 
 		@Override
 		public void send(String command, byte[] data) {
-			throw new UnsupportedOperationException("Usage of DoneHandler to manage backpressure is required");
+			connection.send(command, data);
 		}
 
 		public void remove(String clientId) {
