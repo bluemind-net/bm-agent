@@ -26,7 +26,7 @@
 		<repository>
 			<id>bluemind-deps</id>
 			<layout>p2</layout>
-			<url>http://forge.blue-mind.net/staging/p2/dependencies/163/</url>
+			<url>http://forge.blue-mind.net/staging/p2/dependencies/current/</url>
 		</repository>
 		<repository>
 			<id>bluemind-plugins</id>
