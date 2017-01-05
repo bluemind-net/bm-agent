@@ -28,8 +28,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
-import org.vertx.java.platform.impl.DefaultPlatformManagerFactory;
 
 import net.bluemind.agent.VertxHolder;
 
@@ -41,7 +41,7 @@ public class AgentClientModule implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Client");
 
-		PlatformManager pm = new DefaultPlatformManagerFactory().createPlatformManager();
+		PlatformManager pm = PlatformLocator.factory.createPlatformManager();
 		VertxHolder.vertx = pm.vertx();
 		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClient", null, new URL[0], 1, null, null);
 		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClientVerticle", null, new URL[0], 1, null, null);
