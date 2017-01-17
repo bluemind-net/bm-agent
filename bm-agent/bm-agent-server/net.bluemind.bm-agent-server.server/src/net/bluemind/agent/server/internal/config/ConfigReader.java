@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.bluemind.agent.config.SSLConfig;
+
 public class ConfigReader {
 
 	private static final int PORT = 8086;
@@ -46,7 +48,7 @@ public class ConfigReader {
 		} catch (Exception e) {
 			logger.warn("Cannot load config from {}, using defaults", filepath);
 		}
-		return new ServerConfig("localhost", PORT);
+		return new ServerConfig("localhost", PORT, new SSLConfig());
 	}
 
 }

@@ -24,11 +24,34 @@ package net.bluemind.agent.client.internal.config;
 
 import org.vertx.java.core.json.JsonObject;
 
+import net.bluemind.agent.config.SSLConfig;
+
 public class ClientConfig {
+
+	public String host;
+	public int port;
+	public String agentId;
+	public SSLConfig sslConfig;
+
+	public ClientConfig() {
+
+	}
+
+	public ClientConfig(JsonObject config) {
+		this(config.getString("host"), config.getInteger("port"), config.getString("agentId"),
+				SSLConfig.fromJson(config));
+	}
+
+	public ClientConfig(String host, int port, String agentId, SSLConfig sslConfig) {
+		this.host = host;
+		this.port = port;
+		this.agentId = agentId;
+		this.sslConfig = sslConfig;
+	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: host: %d, port: %s", host, port);
+		return String.format("%s: host: %d, port: %s, SSL: %s", host, port, sslConfig.toString());
 	}
 
 	public JsonObject toJsonObject() {
@@ -36,6 +59,7 @@ public class ClientConfig {
 		config.putString("host", host);
 		config.putNumber("port", port);
 		config.putString("agentId", agentId);
+		config.putObject("sslConfig", sslConfig.toJson());
 		return config;
 	}
 
@@ -63,22 +87,12 @@ public class ClientConfig {
 		this.agentId = agentId;
 	}
 
-	public String host;
-	public int port;
-	public String agentId;
-
-	public ClientConfig() {
-
+	public SSLConfig getSslConfig() {
+		return sslConfig;
 	}
 
-	public ClientConfig(JsonObject config) {
-		this(config.getString("host"), config.getInteger("port"), config.getString("agentId"));
-	}
-
-	public ClientConfig(String host, int port, String agentId) {
-		this.host = host;
-		this.port = port;
-		this.agentId = agentId;
+	public void setSslConfig(SSLConfig sslConfig) {
+		this.sslConfig = sslConfig;
 	}
 
 }

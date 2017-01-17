@@ -24,17 +24,38 @@ package net.bluemind.agent.server.internal.config;
 
 import org.vertx.java.core.json.JsonObject;
 
+import net.bluemind.agent.config.SSLConfig;
+
 public class ServerConfig {
+
+	public String listenerAddress;
+	public int port;
+	public SSLConfig sslConfig;
+
+	public ServerConfig() {
+
+	}
+
+	public ServerConfig(JsonObject config) {
+		this(config.getString("listenerAddress"), config.getInteger("port"), SSLConfig.fromJson(config));
+	}
+
+	public ServerConfig(String listenerAddress, int port, SSLConfig sslConfig) {
+		this.listenerAddress = listenerAddress;
+		this.port = port;
+		this.sslConfig = sslConfig;
+	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: listenerAddress: %d, port: %s", listenerAddress, port);
+		return String.format("%s: listenerAddress: %d, port: %s, SSL: %s", listenerAddress, port, sslConfig.toString());
 	}
 
 	public JsonObject toJsonObject() {
 		JsonObject config = new JsonObject();
 		config.putString("listenerAddress", listenerAddress);
 		config.putNumber("port", port);
+		config.putObject("sslConfig", sslConfig.toJson());
 		return config;
 	}
 
@@ -54,20 +75,12 @@ public class ServerConfig {
 		this.listenerAddress = listenerAddress;
 	}
 
-	public String listenerAddress;
-	public int port;
-
-	public ServerConfig() {
-
+	public SSLConfig getSslConfig() {
+		return sslConfig;
 	}
 
-	public ServerConfig(JsonObject config) {
-		this(config.getString("listenerAddress"), config.getInteger("port"));
-	}
-
-	public ServerConfig(String listenerAddress, int port) {
-		this.listenerAddress = listenerAddress;
-		this.port = port;
+	public void setSslConfig(SSLConfig sslConfig) {
+		this.sslConfig = sslConfig;
 	}
 
 }
