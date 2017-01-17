@@ -15,6 +15,7 @@
 		<module>bm-agent-server</module>
 		<module>net.bluemind.bm-agent.common</module>
 		<module>handlers</module>
+		<module>org.eclipse.equinox.nonosgi</module>
 	</modules>
 
 	<build>

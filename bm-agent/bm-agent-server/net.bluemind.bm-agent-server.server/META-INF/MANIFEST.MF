@@ -14,5 +14,6 @@ Require-Bundle: org.eclipse.osgi,
  io.vertx.platform;bundle-version="2.1.6",
  com.fasterxml.jackson.core.jackson-databind,
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.4.1",
- com.fasterxml.jackson.core.jackson-core;bundle-version="2.4.1"
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.4.1",
+ org.eclipse.equinox.nonosgi
 Export-Package: net.bluemind.agent.server

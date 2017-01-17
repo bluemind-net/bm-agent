@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.equinox.nonosgi.registry.RegistryFactoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class PluginLoader {
 	public static List<ServerHandler> load() {
 
 		List<ServerHandler> plugins = new ArrayList<ServerHandler>();
-		IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
+		IExtensionRegistry extensionRegistry = RegistryFactoryHelper.getRegistry();
 		if (null == extensionRegistry) {
 			return plugins;
 		}
