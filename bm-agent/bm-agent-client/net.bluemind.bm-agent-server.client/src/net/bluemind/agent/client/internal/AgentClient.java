@@ -106,6 +106,16 @@ public class AgentClient extends Verticle {
 				.setHost(config.host) //
 				.setPort(config.port);
 
+		if (config.sslConfig.isSsl()) {
+			client.setSSL(true) //
+					.setTrustStorePath(config.sslConfig.getTrustStore()) //
+					.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
+			if (config.getSslConfig().isAuthRequired()) {
+				client.setKeyStorePath(config.sslConfig.getKeyStore()) //
+						.setKeyStorePassword(config.sslConfig.getKeyStorePassword());
+			}
+		}
+
 		client.exceptionHandler((t) -> {
 			logger.warn("Error on Connection: {}", t.getMessage());
 			connecting = false;

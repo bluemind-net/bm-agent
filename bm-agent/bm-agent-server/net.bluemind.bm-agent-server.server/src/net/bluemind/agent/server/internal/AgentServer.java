@@ -60,6 +60,17 @@ public class AgentServer extends Verticle {
 		HttpServer server = vertx.createHttpServer() //
 				.setMaxWebSocketFrameSize(WS_FRAMESIZE);
 
+		if (config.sslConfig.isSsl()) {
+			server.setSSL(true) //
+					.setKeyStorePath(config.sslConfig.getKeyStore()) //
+					.setKeyStorePassword(config.sslConfig.getKeyStorePassword());
+			if (config.getSslConfig().isAuthRequired()) {
+				server.setClientAuthRequired(true) //
+						.setTrustStorePath(config.sslConfig.getTrustStore()) //
+						.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
+			}
+		}
+
 		server.websocketHandler(ws -> {
 			logger.info("Connection to websocket established from client: {}",
 					ws.remoteAddress().getAddress().toString());
