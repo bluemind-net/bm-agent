@@ -56,10 +56,11 @@ public class AgentClientVerticle extends Verticle implements ClientConnection {
 
 		eventBus.registerHandler(address_init, (Message<JsonObject> event) -> {
 			String command = event.body().getString("command");
+			String agentId = event.body().getString("agentId");
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
 			handler.ifPresent(h -> {
 				logger.debug("Found handler {} for command {}", h.info, command);
-				h.handler.onInitialize(command, AgentClientVerticle.this);
+				h.handler.onInitialize(command, agentId, AgentClientVerticle.this);
 			});
 
 		});

@@ -22,13 +22,11 @@
  */
 package net.bluemind.agent.server.handler.ping;
 
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.bluemind.agent.server.AgentServerHandler;
+import net.bluemind.agent.server.Command;
 import net.bluemind.agent.server.ServerConnection;
 
 public class PingServerHandler implements AgentServerHandler {
@@ -47,8 +45,7 @@ public class PingServerHandler implements AgentServerHandler {
 	}
 
 	@Override
-	public void onCommand(String agentId, String method, String command, List<String> pathParams,
-			Map<String, String> queryParameters, ServerConnection connection) {
+	public void onCommand(Command command, ServerConnection connection) {
 
 	}
 

@@ -189,7 +189,7 @@ net.bluemind.agent.client.AgentClientHandler
 ```Java
 public interface AgentClientHandler {
 
-   public void onInitialize(String command, ClientConnection connection);
+   public void onInitialize(String command, String agentId, ClientConnection connection);
 
    public void onMessage(byte[] data);
 
@@ -235,8 +235,7 @@ public interface AgentServerHandler {
 
    public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
 
-   public void onCommand(String agentId, String method, String command, List<String> pathParams,
-         Map<String, String> queryParameters, ServerConnection connection);
+   public void onCommand(Command command, ServerConnection connection);
 
 }
 ```

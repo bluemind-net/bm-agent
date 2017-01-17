@@ -31,17 +31,12 @@ import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.http.ServerWebSocket;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
-import net.bluemind.agent.server.internal.RequestParser.Command;
-import net.bluemind.agent.server.internal.config.ConfigReader;
+import net.bluemind.agent.server.Command;
 import net.bluemind.agent.server.internal.config.ServerConfig;
 import net.bluemind.agent.server.internal.connection.ConnectionRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
@@ -58,7 +53,7 @@ public class AgentServer extends Verticle {
 
 	@Override
 	public void start() {
-		ServerConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
+		ServerConfig config = new ServerConfig(container.config());
 		logger.info("Starting BM Agent Server on port {}", config.port);
 		this.parser = new MessageParser();
 		registerHandlers();
@@ -96,7 +91,6 @@ public class AgentServer extends Verticle {
 			JsonObject obj = new JsonObject().putString("commandId", commandId);
 			vertx.eventBus().send(AgentServerVerticle.address_command_done, obj);
 		});
-
 	}
 
 	private void reply(String command, String agentId, byte[] data, ServerWebSocket con) {
@@ -132,24 +126,7 @@ public class AgentServer extends Verticle {
 	}
 
 	private void handleCommand(Command command) {
-		JsonArray pathParameters = new JsonArray();
-		for (String param : command.pathParameters) {
-			pathParameters.add(param);
-		}
-
-		String writeValueAsString = null;
-		try {
-			writeValueAsString = new ObjectMapper().writeValueAsString(command.queryParameters);
-		} catch (JsonProcessingException e) {
-			logger.warn("Cannot process query parameters", e);
-		}
-		JsonObject obj = new JsonObject() //
-				.putString("agentId", command.agentId) //
-				.putString("method", command.method) //
-				.putString("command", command.command) //
-				.putString("queryParameters", writeValueAsString).putArray("pathParameters", pathParameters);
-
-		vertx.eventBus().send(AgentServerVerticle.address_command, obj);
+		vertx.eventBus().send(AgentServerVerticle.address_command, command.toJsonObject());
 	}
 
 	private void registerHandlers() {

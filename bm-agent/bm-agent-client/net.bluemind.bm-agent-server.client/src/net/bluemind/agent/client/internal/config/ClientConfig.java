@@ -22,11 +22,21 @@
  */
 package net.bluemind.agent.client.internal.config;
 
+import org.vertx.java.core.json.JsonObject;
+
 public class ClientConfig {
 
 	@Override
 	public String toString() {
 		return String.format("%s: host: %d, port: %s", host, port);
+	}
+
+	public JsonObject toJsonObject() {
+		JsonObject config = new JsonObject();
+		config.putString("host", host);
+		config.putNumber("port", port);
+		config.putString("agentId", agentId);
+		return config;
 	}
 
 	public String getHost() {
@@ -59,6 +69,10 @@ public class ClientConfig {
 
 	public ClientConfig() {
 
+	}
+
+	public ClientConfig(JsonObject config) {
+		this(config.getString("host"), config.getInteger("port"), config.getString("agentId"));
 	}
 
 	public ClientConfig(String host, int port, String agentId) {

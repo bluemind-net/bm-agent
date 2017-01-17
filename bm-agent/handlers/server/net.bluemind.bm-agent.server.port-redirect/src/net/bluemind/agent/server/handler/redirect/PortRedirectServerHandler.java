@@ -22,7 +22,6 @@
  */
 package net.bluemind.agent.server.handler.redirect;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import net.bluemind.agent.server.AgentServerHandler;
+import net.bluemind.agent.server.Command;
 import net.bluemind.agent.server.ServerConnection;
 import net.bluemind.agent.server.handler.redirect.config.HostPortConfig;
 
@@ -59,15 +59,15 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	}
 
 	@Override
-	public void onCommand(String agentId, String method, String command, List<String> pathParams,
-			Map<String, String> queryParameters, ServerConnection connection) {
-		switch (method) {
-		case "GET":
-			initializePortRedirection(agentId, command, queryParameters, connection);
+	public void onCommand(Command command, ServerConnection connection) {
+		switch (command.method) {
+		case GET:
+			initializePortRedirection(command.agentId, command.command, command.queryParameters, connection);
 			break;
-		case "DELETE":
-			deletePortRedirection(agentId, command, queryParameters, connection);
+		case DELETE:
+			deletePortRedirection(command.agentId, command.command, command.queryParameters, connection);
 			break;
+		default:
 		}
 
 	}

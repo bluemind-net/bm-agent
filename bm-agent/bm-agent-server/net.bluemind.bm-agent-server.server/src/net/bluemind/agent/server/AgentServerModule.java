@@ -23,6 +23,7 @@
 package net.bluemind.agent.server;
 
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -32,6 +33,9 @@ import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
 
 import net.bluemind.agent.VertxHolder;
+import net.bluemind.agent.server.internal.AgentServerVerticle;
+import net.bluemind.agent.server.internal.config.ConfigReader;
+import net.bluemind.agent.server.internal.config.ServerConfig;
 
 public class AgentServerModule implements BundleActivator {
 
@@ -41,11 +45,24 @@ public class AgentServerModule implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Server");
 
-		PlatformManager pm = PlatformLocator.factory.createPlatformManager();
-		VertxHolder.vertx = pm.vertx();
-		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServer", null, new URL[0], 1, null, null);
-		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServerVerticle", null, new URL[0], 1, null, null);
+		ServerConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
+		deployVerticles(config, () -> logger.info("Agent Server is running..."));
+	}
 
+	private void deployVerticles(ServerConfig config, Runnable doneHandler) {
+		PlatformManager pm = PlatformLocator.factory.createPlatformManager();
+		VertxHolder.vertices.put(VertxHolder.DEFAULT, pm.vertx());
+		VertxHolder.pms.put(VertxHolder.DEFAULT, pm);
+		CompletableFuture<String> doneAgent = new CompletableFuture<>();
+		CompletableFuture<String> doneCommHandler = new CompletableFuture<>();
+		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServer", config.toJsonObject(), new URL[0], 1, null,
+				(s) -> doneAgent.complete(s.result()));
+		pm.deployVerticle("net.bluemind.agent.server.internal.AgentServerVerticle", null, new URL[0], 1, null,
+				(s) -> doneCommHandler.complete(s.result()));
+		doneAgent.thenAcceptBoth(doneCommHandler, (a, b) -> {
+			logger.info("Deployed verticles {} and {}", a, b);
+			doneHandler.run();
+		});
 	}
 
 	@Override
@@ -55,6 +72,25 @@ public class AgentServerModule implements BundleActivator {
 
 	public static void main(String[] args) throws Exception {
 		new AgentServerModule().start(null);
+	}
+
+	/*
+	 * methods used in library mode
+	 */
+
+	public static void run(ServerConfig config, Runnable doneHandler) {
+		new AgentServerModule().deployVerticles(config, doneHandler);
+	}
+
+	public static void command(Command command) {
+		VertxHolder.vertices.get(VertxHolder.DEFAULT).eventBus().send(AgentServerVerticle.address_command,
+				command.toJsonObject());
+	}
+
+	public static void stop() {
+		VertxHolder.pms.keySet()
+				.forEach((id) -> VertxHolder.pms.get(id).undeployAll((r) -> VertxHolder.vertices.get(id).stop()));
+		VertxHolder.reset();
 	}
 
 }

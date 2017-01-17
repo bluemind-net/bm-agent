@@ -38,6 +38,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 	Logger logger = LoggerFactory.getLogger(PortRedirectClientHandler.class);
 	public static Map<String, ConnectionHandler> handlers = new ConcurrentHashMap<>();
 	private PortRedirectionConnection connection;
+	private String agentId;
 
 	@Override
 	public void onMessage(byte[] data) {
@@ -64,7 +65,7 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 		} else {
 			logger.info("handler for id {} is not connected yet", clientId);
 			if (!control.equals("ack/end")) {
-				handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort);
+				handler = new ConnectionHandler(connection, clientId, serverHost, clientPort, serverDestPort, agentId);
 				try {
 					handler.connect();
 					logger.info("Connected to {}:{}", serverHost, serverDestPort);
@@ -82,7 +83,8 @@ public class PortRedirectClientHandler implements AgentClientHandler {
 	}
 
 	@Override
-	public void onInitialize(String command, ClientConnection connection) {
+	public void onInitialize(String command, String agentId, ClientConnection connection) {
+		this.agentId = agentId;
 		this.connection = new PortRedirectionConnection(connection, command);
 	}
 

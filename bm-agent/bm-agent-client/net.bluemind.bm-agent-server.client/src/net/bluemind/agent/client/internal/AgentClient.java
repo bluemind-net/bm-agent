@@ -23,7 +23,6 @@
 package net.bluemind.agent.client.internal;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,7 @@ import org.vertx.java.platform.Verticle;
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
 import net.bluemind.agent.client.internal.config.ClientConfig;
-import net.bluemind.agent.client.internal.config.ConfigReader;
 import net.bluemind.agent.client.internal.handler.HandlerRegistry;
-import net.bluemind.agent.client.internal.handler.HandlerRegistry.AgentHandler;
 import net.bluemind.agent.client.internal.handler.PluginLoader;
 import net.bluemind.agent.client.internal.handler.PluginLoader.ClientHandler;
 
@@ -62,7 +59,7 @@ public class AgentClient extends Verticle {
 	@Override
 	public void start() {
 		logger.info("Starting BM Agent Client");
-		config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
+		config = new ClientConfig(container.config());
 		registerHandlers();
 		connect();
 
@@ -140,13 +137,14 @@ public class AgentClient extends Verticle {
 	private void handleMessage(WebSocket ws, String value) {
 		try {
 			BmMessage message = parser.read(value);
-			message.setAgentId(config.agentId);
 			logger.debug("Incoming Message: {}", message);
-			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(message.getCommand());
-			handler.ifPresent(h -> {
-				logger.debug("Found handler {} for command {}", h.info, message.getCommand());
-				h.handler.onMessage(message.getData());
-			});
+
+			JsonObject obj = new JsonObject() //
+					.putString("agentId", config.agentId) //
+					.putString("command", message.getCommand()) //
+					.putBinary("data", message.getData()) //
+					.asObject();
+			vertx.eventBus().send(AgentClientVerticle.address_message, obj);
 		} catch (Exception e) {
 			logger.warn("Error while handling message", e);
 		}
@@ -160,6 +158,7 @@ public class AgentClient extends Verticle {
 			HandlerRegistry.getInstance().register(plugin.command, plugin.handler, plugin.name);
 			JsonObject obj = new JsonObject() //
 					.putString("command", plugin.command) //
+					.putString("agentId", config.agentId) //
 					.asObject();
 
 			vertx.eventBus().send(AgentClientVerticle.address_init, obj);

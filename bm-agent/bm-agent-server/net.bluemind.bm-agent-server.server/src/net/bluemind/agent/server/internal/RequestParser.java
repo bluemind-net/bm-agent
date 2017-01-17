@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.MultiMap;
 import org.vertx.java.core.http.HttpServerRequest;
 
+import net.bluemind.agent.server.Command;
+
 public class RequestParser {
 
 	private static final Logger logger = LoggerFactory.getLogger(RequestParser.class);
@@ -62,24 +64,6 @@ public class RequestParser {
 			queryMap.put(key, value);
 		}
 		return new Command(method, command, agentId, additionalParameters, queryMap);
-
-	}
-
-	public static class Command {
-		public final String method;
-		public final String command;
-		public final String agentId;
-		public final String[] pathParameters;
-		public final Map<String, String> queryParameters;
-
-		public Command(String method, String command, String agentId, String[] pathParameters,
-				Map<String, String> queryParameters) {
-			this.method = method;
-			this.command = command;
-			this.agentId = agentId;
-			this.pathParameters = pathParameters;
-			this.queryParameters = queryParameters;
-		}
 
 	}
 

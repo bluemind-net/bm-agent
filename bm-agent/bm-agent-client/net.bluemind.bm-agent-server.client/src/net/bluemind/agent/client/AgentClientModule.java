@@ -23,6 +23,7 @@
 package net.bluemind.agent.client;
 
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -32,6 +33,8 @@ import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
 
 import net.bluemind.agent.VertxHolder;
+import net.bluemind.agent.client.internal.config.ClientConfig;
+import net.bluemind.agent.client.internal.config.ConfigReader;
 
 public class AgentClientModule implements BundleActivator {
 
@@ -41,11 +44,25 @@ public class AgentClientModule implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Client");
 
-		PlatformManager pm = PlatformLocator.factory.createPlatformManager();
-		VertxHolder.vertx = pm.vertx();
-		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClient", null, new URL[0], 1, null, null);
-		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClientVerticle", null, new URL[0], 1, null, null);
+		ClientConfig config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
+		deployVerticles(config, () -> logger.info("Agent Client is running..."));
 
+	}
+
+	private void deployVerticles(ClientConfig config, Runnable doneHandler) {
+		PlatformManager pm = PlatformLocator.factory.createPlatformManager();
+		VertxHolder.vertices.put(config.agentId, pm.vertx());
+		VertxHolder.pms.put(config.agentId, pm);
+		CompletableFuture<String> doneAgent = new CompletableFuture<>();
+		CompletableFuture<String> doneCommHandler = new CompletableFuture<>();
+		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClient", config.toJsonObject(), new URL[0], 1, null,
+				(s) -> doneAgent.complete(s.result()));
+		pm.deployVerticle("net.bluemind.agent.client.internal.AgentClientVerticle", null, new URL[0], 1, null,
+				(s) -> doneCommHandler.complete(s.result()));
+		doneAgent.thenAcceptBoth(doneCommHandler, (a, b) -> {
+			logger.info("Deployed verticles {} and {}", a, b);
+			doneHandler.run();
+		});
 	}
 
 	@Override
@@ -53,8 +70,18 @@ public class AgentClientModule implements BundleActivator {
 		logger.info("Stopping BlueMind Agent Client");
 	}
 
-	public static void main(String[] args) throws Exception {
-		new AgentClientModule().start(null);
+	/*
+	 * methods used in library mode
+	 */
+
+	public static void run(ClientConfig config, Runnable doneHandler) {
+		new AgentClientModule().deployVerticles(config, doneHandler);
+	}
+
+	public static void stop() {
+		VertxHolder.pms.keySet()
+				.forEach((id) -> VertxHolder.pms.get(id).undeployAll((r) -> VertxHolder.vertices.get(id).stop()));
+		VertxHolder.reset();
 	}
 
 }

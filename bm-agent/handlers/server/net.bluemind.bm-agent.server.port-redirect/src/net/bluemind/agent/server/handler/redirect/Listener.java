@@ -58,7 +58,7 @@ public class Listener {
 
 	public void start() throws Exception {
 
-		server = VertxHolder.vertx.createNetServer();
+		server = VertxHolder.vertices.get(VertxHolder.DEFAULT).createNetServer();
 		server.connectHandler((NetSocket netSocket) -> {
 			String clientId = UUID.randomUUID().toString();
 			ServerHandler serverHandler = new ServerHandler(clientId, netSocket, Listener.this);

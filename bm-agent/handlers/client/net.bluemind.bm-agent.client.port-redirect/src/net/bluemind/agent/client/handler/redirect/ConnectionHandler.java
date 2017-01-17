@@ -42,6 +42,7 @@ public class ConnectionHandler {
 	protected final int serverDestPort;
 	protected final PortRedirectionConnection connection;
 	protected final String serverHost;
+	protected final String agentId;
 	private Buffer buffer = new Buffer();
 	NetSocket socket;
 	boolean stopped;
@@ -50,17 +51,18 @@ public class ConnectionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
 
 	public ConnectionHandler(PortRedirectionConnection connection, String clientId, String serverHost, int clientPort,
-			int serverDestPort) {
+			int serverDestPort, String agentId) {
 		this.clientId = clientId;
 		this.clientPort = clientPort;
 		this.serverDestPort = serverDestPort;
 		this.connection = connection;
 		this.serverHost = serverHost;
+		this.agentId = agentId;
 	}
 
 	public void connect() throws Exception {
 		logger.info("Going to connect to {}:{}", serverHost, serverDestPort);
-		Vertx vertx = VertxHolder.vertx;
+		Vertx vertx = VertxHolder.getVertx(agentId);
 		NetClient client = vertx.createNetClient();
 		client.connect(serverDestPort, serverHost, (AsyncResult<NetSocket> asyncResult) -> {
 			if (asyncResult.succeeded()) {

@@ -22,14 +22,10 @@
  */
 package net.bluemind.agent.server;
 
-import java.util.List;
-import java.util.Map;
-
 public interface AgentServerHandler {
 
 	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
 
-	public void onCommand(String agentId, String method, String command, List<String> pathParams,
-			Map<String, String> queryParameters, ServerConnection connection);
+	public void onCommand(Command command, ServerConnection connection);
 
 }

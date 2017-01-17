@@ -24,7 +24,7 @@ package net.bluemind.agent.client;
 
 public interface AgentClientHandler {
 
-	public void onInitialize(String command, ClientConnection connection);
+	public void onInitialize(String command, String agentId, ClientConnection connection);
 
 	public void onMessage(byte[] data);
 

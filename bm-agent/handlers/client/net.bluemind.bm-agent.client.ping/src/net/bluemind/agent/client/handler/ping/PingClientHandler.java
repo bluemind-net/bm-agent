@@ -38,7 +38,7 @@ public class PingClientHandler implements AgentClientHandler {
 	}
 
 	@Override
-	public void onInitialize(final String command, final ClientConnection connection) {
+	public void onInitialize(final String command, String agentId, final ClientConnection connection) {
 		ping(command, connection);
 		new Thread(() -> {
 			while (true) {

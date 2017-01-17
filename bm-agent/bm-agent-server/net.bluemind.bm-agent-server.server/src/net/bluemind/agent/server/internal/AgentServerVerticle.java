@@ -22,9 +22,6 @@
  */
 package net.bluemind.agent.server.internal;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,14 +31,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.bluemind.agent.DoneHandler;
 import net.bluemind.agent.NoopHandler;
+import net.bluemind.agent.server.Command;
 import net.bluemind.agent.server.ServerConnection;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry.AgentHandler;
@@ -56,7 +51,6 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 	private static final Logger logger = LoggerFactory.getLogger(AgentServerVerticle.class);
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void start() {
 		super.start();
 
@@ -74,27 +68,11 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 		});
 
 		eventBus.registerHandler(address_command, (Message<JsonObject> event) -> {
-			String method = event.body().getString("method");
-			String command = event.body().getString("command");
-			String agentId = event.body().getString("agentId");
-			JsonArray pathParameters = event.body().getArray("pathParameters");
-			List<String> pathParams = new ArrayList<>();
-			for (int i = 0; i < pathParameters.size(); i++) {
-				pathParams.add(pathParameters.get(i));
-			}
-
-			Map<String, String> queryParameters = null;
-			try {
-				queryParameters = new ObjectMapper().readValue(event.body().getString("queryParameters"),
-						HashMap.class);
-			} catch (Exception e) {
-			}
-			final Map<String, String> qParams = queryParameters;
-
-			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
+			Command command = new Command(event.body());
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command.command);
 			handler.ifPresent(h -> {
-				logger.debug("Found handler {} for command {}", h.info, command);
-				h.handler.onCommand(agentId, method, command, pathParams, qParams, AgentServerVerticle.this);
+				logger.debug("Found handler {} for command {}", h.info, command.command);
+				h.handler.onCommand(command, AgentServerVerticle.this);
 			});
 
 		});
