@@ -133,7 +133,7 @@ You can disable a port redirection by calling the same URL using the HTTP method
 # Embedding bm-agent-client or bm-agent-server
 
 Both, client and server, can be embedded in your Java application and used as a library by adding following artifacts to your dependencies:
-```
+```XML
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.common</artifactId>
@@ -154,7 +154,7 @@ Both, client and server, can be embedded in your Java application and used as a 
 </dependency>
 ```
 To embed the server, you will also need the artifact
-```
+```XML
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.server</artifactId>
@@ -162,7 +162,7 @@ To embed the server, you will also need the artifact
 </dependency>
 ```
 To embed the client, you will need the artifact
-```
+```XML
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.client</artifactId>
@@ -170,7 +170,7 @@ To embed the client, you will need the artifact
 </dependency>
 ```
 The plugins ping and port forwarding are likewise available as maven artifacts:
-```
+```XML
 <!-- ping handler implementations -->
 <dependency>
 	<groupId>net.bluemind</groupId>
@@ -219,7 +219,7 @@ To replace the REST API call
 "http://<server>/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
 ```
 you can use the command method as follows:
-```
+```Java
 String[] pathParameters = new String[0];
 Map<String, String> queryParameters = new HashMap<>();
 queryParameters.put("port", String.valueOf(2222));
@@ -245,7 +245,7 @@ public static void stopAll()
 Stops all clients
 
 # Example
-```
+```Java
 package net.bluemind.bm.agent.test;
 
 import java.io.IOException;
@@ -442,7 +442,7 @@ The method ``` onMessage ``` will be called when message from the server part of
 bm-agent uses Eclipse Extension Points to lookup plugins during startup.
 You can attach your plugin extension in the file plugin.xml:
 
-```
+```XML
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
@@ -484,7 +484,7 @@ The method ``` onCommand ``` will be called when REST messages for your plugin h
 
 You can attach your plugin extension in the file plugin.xml:
 
-```
+```XML
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
