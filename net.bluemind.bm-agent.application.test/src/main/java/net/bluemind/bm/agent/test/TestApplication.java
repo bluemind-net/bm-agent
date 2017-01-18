@@ -22,8 +22,10 @@
  */
 package net.bluemind.bm.agent.test;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,36 +39,80 @@ import net.bluemind.agent.server.internal.config.ServerConfig;
 
 public class TestApplication {
 
+	/*
+	 * This example embeds bm-agent-server and bm-agent-client. To demonstrate
+	 * the port forwarding feature, the method "startPortForwarding" will
+	 * redirect localhost:8181 to localhost:22
+	 */
+
+	private static final String serverHost = "localhost";
+	private static final String serverListenerAddress = "localhost";
+	private static final int serverPort = 8080;
+
+	// port forwarding config
+	private static final String portForwardingTargetHost = "localhost";
+	private static final int portForwardingTargetPort = 22;
+	private static final int portForwardingLocalPort = 8181;
+
 	private static final Logger logger = LoggerFactory.getLogger(TestApplication.class);
 
 	public static void main(String[] args) throws Exception {
 
-		ServerConfig serverConfig = new ServerConfig("localhost", 8080, SSLConfig.noSSL());
-		AgentServerModule.run(serverConfig, () -> {
-			System.out.println("server running");
-			ClientConfig clientConfig = new ClientConfig("localhost", 8080, "agent-1", SSLConfig.noSSL());
-			AgentClientModule.run(clientConfig, () -> {
-				System.out.println("client  running");
-				Command command = portForwardingExample("localhost");
-				AgentServerModule.command(command);
-			});
-		});
+		TestApplication.startServer() //
+				.thenCompose(TestApplication::startClient) //
+				.thenRun(TestApplication::startPortForwarding) //
+				.exceptionally((e) -> {
+					logger.warn("Error while executing Test application", e);
+					return null;
+				});
 
-		logger.info("Application is running... Type anything to stop");
-		System.in.read();
+		Thread.sleep(2000);
+		waitForQuit();
+	}
 
+	private static void waitForQuit() {
+		logger.info("Application started...");
+		logger.info("the port-forwarding example will open port {} on locahost and redirecting all input to {}:{}",
+				portForwardingLocalPort, portForwardingTargetHost, portForwardingTargetPort);
+		logger.info("Type anything to QUIT");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+
+		}
 		AgentClientModule.stop();
 		AgentServerModule.stop();
 	}
 
-	private static Command portForwardingExample(String mySSHServer) {
-		// this example will open a local port 8081 and redirecting all input to
-		// port 22 of mySSHServer
+	private static CompletableFuture<Void> startServer() {
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL());
+		AgentServerModule.run(serverConfig, () -> {
+			future.complete(null);
+		});
+		return future;
+	}
+
+	private static CompletableFuture<Void> startClient(Void ret) {
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		ClientConfig clientConfig = new ClientConfig(serverHost, serverPort, "agent-1", SSLConfig.noSSL());
+		AgentClientModule.run(clientConfig, () -> {
+			future.complete(null);
+		});
+		return future;
+	}
+
+	private static void startPortForwarding() {
+		Command command = portForwardingExample();
+		AgentServerModule.command(command);
+	}
+
+	private static Command portForwardingExample() {
 		String[] pathParameters = new String[0];
 		Map<String, String> queryParameters = new HashMap<>();
-		queryParameters.put("port", "22");
-		queryParameters.put("host", mySSHServer);
-		queryParameters.put("localPort", "8081");
+		queryParameters.put("port", String.valueOf(portForwardingTargetPort));
+		queryParameters.put("host", portForwardingTargetHost);
+		queryParameters.put("localPort", String.valueOf(portForwardingLocalPort));
 		Command command = new Command("GET", "port-redirect", "agent-1", pathParameters, queryParameters);
 		return command;
 	}
