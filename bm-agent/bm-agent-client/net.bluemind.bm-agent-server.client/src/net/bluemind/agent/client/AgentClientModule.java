@@ -78,7 +78,14 @@ public class AgentClientModule implements BundleActivator {
 		new AgentClientModule().deployVerticles(config, doneHandler);
 	}
 
-	public static void stop() {
+	public static void stop(String agentId) {
+		VertxHolder.pms.keySet() //
+				.stream() //
+				.filter(key -> key.equals("agentId")) //
+				.forEach((id) -> VertxHolder.pms.get(id).undeployAll((r) -> VertxHolder.vertices.get(id).stop()));
+	}
+
+	public static void stopAll() {
 		VertxHolder.pms.keySet()
 				.forEach((id) -> VertxHolder.pms.get(id).undeployAll((r) -> VertxHolder.vertices.get(id).stop()));
 		VertxHolder.reset();

@@ -130,6 +130,223 @@ This will open port 2223 on the server side. all data written to this socket wil
 
 You can disable a port redirection by calling the same URL using the HTTP method DELETE.
 
+# Embedding bm-agent-client or bm-agent-server
+
+Both, client and server, can be embedded in your Java application and used as a library by adding following artifacts to your dependencies:
+```
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent.common</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>org.eclipse.equinox.nonosgi</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent.runtime.deps</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+	<type>pom</type>
+</dependency>
+```
+To embed the server, you will also need the artifact
+```
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent-server.server</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+```
+To embed the client, you will need the artifact
+```
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent-server.client</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+```
+The plugins ping and port forwarding are likewise available as maven artifacts:
+```
+<!-- ping handler implementations -->
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent.server.ping</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+
+<!-- port-redirect handler implementations -->
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+	<groupId>net.bluemind</groupId>
+	<artifactId>net.bluemind.bm-agent.server.port-redirect</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+##### Server
+
+To manage the server programmatically, the class "AgentServerModule" exposes 3 static methods
+```
+public static void run(ServerConfig config, Runnable doneHandler)
+```
+Starts the server using the submitted configuration. since the start is an asynchronous operation, you can submit a doneHandler which will be called once the server has been completely started and deployed all plugins.
+```
+public static void stop()
+```
+Stops the server
+```
+public static void command(Command command)
+```
+Executes a command. This can be used as an alternative to the REST command API to manage all interaction with the server programmatically. The REST API remains still available in this mode.  
+Example:
+To replace the REST API call 
+```
+"http://<server>/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
+```
+you can use the command method as follows:
+```
+String[] pathParameters = new String[0];
+Map<String, String> queryParameters = new HashMap<>();
+queryParameters.put("port", String.valueOf(2222));
+queryParameters.put("host", "192.168.1.1");
+queryParameters.put("localPort", String.valueOf(2223));
+Command command = new Command("GET", "port-redirect", "agent1", pathParameters, queryParameters);
+AgentServerModule.command(command);
+```
+
+##### Client
+Like the server, the client exposes its functionality using static methods
+```
+public static void run(ClientConfig config, Runnable doneHandler)
+```
+Starts a client using the agentId configured in the config parameter. The doneHandler will be called once the client has been started and deployed all plugins. You can start multiple clients, all communicating with different bm-agent servers.
+```
+public static void stop(String agentId)
+```
+Stops the specific client and undeploys all associated plugins
+```
+public static void stopAll()
+```
+Stops all clients
+
+# Example
+```
+package net.bluemind.bm.agent.test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.bluemind.agent.client.AgentClientModule;
+import net.bluemind.agent.client.internal.config.ClientConfig;
+import net.bluemind.agent.config.SSLConfig;
+import net.bluemind.agent.server.AgentServerModule;
+import net.bluemind.agent.server.Command;
+import net.bluemind.agent.server.internal.config.ServerConfig;
+
+public class TestApplication {
+
+	/*
+	 * This example embeds bm-agent-server and bm-agent-client. To demonstrate
+	 * the port forwarding feature, the method "startPortForwarding" will
+	 * redirect localhost:8181 to localhost:22
+	 */
+
+	private static final String serverHost = "localhost";
+	private static final String serverListenerAddress = "localhost";
+	private static final int serverPort = 8080;
+
+	// port forwarding config
+	private static final String portForwardingTargetHost = "localhost";
+	private static final int portForwardingTargetPort = 22;
+	private static final int portForwardingLocalPort = 8181;
+
+	private static final Logger logger = LoggerFactory.getLogger(TestApplication.class);
+
+	public static void main(String[] args) throws Exception {
+
+		TestApplication.startServer() //
+				.thenCompose(TestApplication::startClient) //
+				.thenRun(TestApplication::startPortForwarding) //
+				.exceptionally((e) -> {
+					logger.warn("Error while executing Test application", e);
+					return null;
+				});
+
+		Thread.sleep(2000);
+		waitForQuit();
+	}
+
+	private static void waitForQuit() {
+		logger.info("Application started...");
+		logger.info("the port-forwarding example will open port {} on locahost and redirecting all input to {}:{}",
+				portForwardingLocalPort, portForwardingTargetHost, portForwardingTargetPort);
+		logger.info("Type anything to QUIT");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+
+		}
+		AgentClientModule.stop();
+		AgentServerModule.stop();
+	}
+
+	private static CompletableFuture<Void> startServer() {
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL());
+		AgentServerModule.run(serverConfig, () -> {
+			future.complete(null);
+		});
+		return future;
+	}
+
+	private static CompletableFuture<Void> startClient(Void ret) {
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		ClientConfig clientConfig = new ClientConfig(serverHost, serverPort, "agent-1", SSLConfig.noSSL());
+		AgentClientModule.run(clientConfig, () -> {
+			future.complete(null);
+		});
+		return future;
+	}
+
+	private static void startPortForwarding() {
+		Command command = portForwardingExample();
+		AgentServerModule.command(command);
+	}
+
+	private static Command portForwardingExample() {
+		String[] pathParameters = new String[0];
+		Map<String, String> queryParameters = new HashMap<>();
+		queryParameters.put("port", String.valueOf(portForwardingTargetPort));
+		queryParameters.put("host", portForwardingTargetHost);
+		queryParameters.put("localPort", String.valueOf(portForwardingLocalPort));
+		Command command = new Command("GET", "port-redirect", "agent-1", pathParameters, queryParameters);
+		return command;
+	}
+
+}
+```
+See the project net.bluemind.bm-agent.application.test for the complete example code.
+
 # Developing a Plugin
 
 the easiest way to develop a plugin is to copy the very simple existing ping plugin and use it as a template.
