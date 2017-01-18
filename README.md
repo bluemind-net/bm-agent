@@ -347,6 +347,10 @@ public class TestApplication {
 ```
 See the project net.bluemind.bm-agent.application.test for the complete example code.
 
+##### Classloader in embedded mode
+
+When started via the published .deb packages, the client/server will run as an OSGI application using Eclipse Equinox as its target runtime. When using the embedded mode, the features provided by equinox will still work (for example the plugin lookup via Eclipse Extension Points), however there is a slightly different behaviour regarding the classloader, since all classes will be loaded by your applications classloader. In contrast to OSGI, dependencies used by bm-agent will be visible by your application classloader. 
+
 # Developing a Plugin
 
 the easiest way to develop a plugin is to copy the very simple existing ping plugin and use it as a template.
