@@ -57,10 +57,19 @@ The server will search the configuration file using following path:
 ```javascript
 {
       "listenerAddress" : "0.0.0.0",
-      "port" : 8086
+      "port" : 8086,
+      "sslConfig" : {
+            "ssl" : true || false,
+	        "keyStore" : <path to keystore>,
+	        "keyStorePassword" : <keystore password>,
+	        "authRequired" : true || false,
+	        "trustStore" : <path to truststore>,
+	        "trustStorePassword" : <truststore password>
+      }
 }
 ```
 where ListenerAddress and port define the address and port the server should listen on.
+If you do not intend to use SSL, you can omit the sslConfig object or set "ssl" to false. If the server should run in SSL mode, but no client authentication is required, the value "authRequired" should be set to false and "trustStore" and "trustStorePassword" can be omited.
 
 ##### bm-agent-client
 The client will search the configuration file using following path:
@@ -69,10 +78,21 @@ The client will search the configuration file using following path:
 {
       "agentId" : "agent-idX",
       "host" : "<server>",
-      "port" : 8086
+      "port" : 8086,
+      "sslConfig" : {
+            "ssl" : true || false,
+            "trustAll" : true || false,
+	        "trustStore" : <path to truststore>,
+	        "trustStorePassword" : <truststore password>,
+	        "authRequired" : true || false,
+	        "keyStore" : <path to keystore>,
+	        "keyStorePassword" : <keystore password>,
 }
 ```
 where agentId is a unique client identifier and host and port define the server host and port.
+If you do not intend to use SSL, you can omit the sslConfig object or set "ssl" to false. 
+If the client should run in SSL mode, but you want to trust all server certificates, the value "trustAll" should be set to true and "trustStore" and "trustStorePassword" can be omited.
+If the client should run in SSL mode, but no client authentication is required, the value "authRequired" should be set to false and "keyStore" and "keyStorePassword" can be omited.
 
 # Starting the application
 
