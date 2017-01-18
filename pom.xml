@@ -17,6 +17,7 @@
 	<modules>
 		<module>bm-agent</module>
 		<module>./global/pom.xml</module>
+		<module>net.bluemind.bm-agent.application.test</module>
 	</modules>
 
 	<profiles>

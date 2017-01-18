@@ -147,4 +147,11 @@ public class SSLConfig {
 		return new Boolean(value.length() > 0).toString();
 	}
 
+	public static SSLConfig noSSL() {
+		SSLConfig config = new SSLConfig();
+		config.ssl = false;
+		config.authRequired = false;
+		return config;
+	}
+
 }

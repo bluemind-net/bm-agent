@@ -1,0 +1,196 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>net.bluemind.bm-agent.application.test</artifactId>
+
+	<parent>
+		<groupId>net.bluemind</groupId>
+		<artifactId>net.bluemind.agent</artifactId>
+		<version>3.1.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<!-- bm-agent dependencies -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent-server.server</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent-server.client</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.common</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>org.eclipse.equinox.nonosgi</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+
+		<!-- ping handler implementations -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.server.ping</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<!-- port-redirect handler implementations -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.server.port-redirect</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+
+
+		<!-- dependencies needed by bm-agent-server respectively bm-agent-client -->
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.7.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.7.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.7.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.0.42.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-core</artifactId>
+			<version>2.1.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-platform</artifactId>
+			<version>2.1.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.eclipse.common</artifactId>
+			<version>3.1.20462</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.lib.jackson</artifactId>
+			<version>3.1.20462</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.lib.vertx</artifactId>
+			<version>3.1.20462</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>contenttype</artifactId>
+			<version>3.4.200-v20140207-1251</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>jobs</artifactId>
+			<version>3.5.300-v20130429-1813</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>4.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>org.eclipse.core.runtime</artifactId>
+			<version>3.10.0.v20140318-2214</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>org.eclipse.osgi</artifactId>
+			<version>3.10.1.v20140909-1633.</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.22</version>
+		</dependency>
+
+
+	</dependencies>
+
+
+</project>
