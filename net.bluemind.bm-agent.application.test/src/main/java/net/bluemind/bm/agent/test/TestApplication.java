@@ -60,6 +60,8 @@ public class TestApplication {
 	}
 
 	private static Command portForwardingExample(String mySSHServer) {
+		// this example will open a local port 8081 and redirecting all input to
+		// port 22 of mySSHServer
 		String[] pathParameters = new String[0];
 		Map<String, String> queryParameters = new HashMap<>();
 		queryParameters.put("port", "22");
