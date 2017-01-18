@@ -47,12 +47,7 @@ public class TestApplication {
 			ClientConfig clientConfig = new ClientConfig("localhost", 8080, "agent-1", SSLConfig.noSSL());
 			AgentClientModule.run(clientConfig, () -> {
 				System.out.println("client  running");
-				String[] pathParameters = new String[0];
-				Map<String, String> queryParameters = new HashMap<>();
-				queryParameters.put("port", "22");
-				queryParameters.put("host", "ubuntu-bmcore2.lan");
-				queryParameters.put("localPort", "8081");
-				Command command = new Command("GET", "port-redirect", "agent-1", pathParameters, queryParameters);
+				Command command = portForwardingExample("localhost");
 				AgentServerModule.command(command);
 			});
 		});
@@ -62,6 +57,16 @@ public class TestApplication {
 
 		AgentClientModule.stop();
 		AgentServerModule.stop();
+	}
+
+	private static Command portForwardingExample(String mySSHServer) {
+		String[] pathParameters = new String[0];
+		Map<String, String> queryParameters = new HashMap<>();
+		queryParameters.put("port", "22");
+		queryParameters.put("host", mySSHServer);
+		queryParameters.put("localPort", "8081");
+		Command command = new Command("GET", "port-redirect", "agent-1", pathParameters, queryParameters);
+		return command;
 	}
 
 }
