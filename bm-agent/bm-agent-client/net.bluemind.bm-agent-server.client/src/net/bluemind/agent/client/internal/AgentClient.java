@@ -107,9 +107,13 @@ public class AgentClient extends Verticle {
 				.setPort(config.port);
 
 		if (config.sslConfig.isSsl()) {
-			client.setSSL(true) //
-					.setTrustStorePath(config.sslConfig.getTrustStore()) //
-					.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
+			client.setSSL(true);
+			if (config.sslConfig.isTrustAll()) {
+				client.setTrustAll(config.sslConfig.isTrustAll());
+			} else {
+				client.setTrustStorePath(config.sslConfig.getTrustStore()) //
+						.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
+			}
 			if (config.getSslConfig().isAuthRequired()) {
 				client.setKeyStorePath(config.sslConfig.getKeyStore()) //
 						.setKeyStorePassword(config.sslConfig.getKeyStorePassword());

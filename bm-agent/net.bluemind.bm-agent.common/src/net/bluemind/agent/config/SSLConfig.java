@@ -32,6 +32,7 @@ public class SSLConfig {
 	private String trustStore;
 	private String trustStorePassword;
 	private boolean authRequired;
+	private boolean trustAll;
 
 	public SSLConfig() {
 
@@ -43,6 +44,14 @@ public class SSLConfig {
 
 	public void setSsl(boolean ssl) {
 		this.ssl = ssl;
+	}
+
+	public boolean isTrustAll() {
+		return trustAll;
+	}
+
+	public void setTrustAll(boolean trustAll) {
+		this.trustAll = trustAll;
 	}
 
 	public String getKeyStore() {
@@ -91,6 +100,7 @@ public class SSLConfig {
 			JsonObject sslConfig = config.getObject("sslConfig");
 			sslConfigs.ssl = sslConfig.getBoolean("ssl", false);
 			sslConfigs.authRequired = sslConfig.getBoolean("authRequired", false);
+			sslConfigs.trustAll = sslConfig.getBoolean("trustAll", false);
 			sslConfigs.keyStore = sslConfig.getString("keyStore", "");
 			sslConfigs.keyStorePassword = sslConfig.getString("keyStorePassword", "");
 			sslConfigs.trustStore = sslConfig.getString("trustStore", "");
@@ -103,6 +113,7 @@ public class SSLConfig {
 		JsonObject json = new JsonObject();
 		json.putBoolean("ssl", ssl);
 		json.putBoolean("authRequired", authRequired);
+		json.putBoolean("trustAll", trustAll);
 		json.putString("keyStore", keyStore);
 		json.putString("keyStorePassword", keyStorePassword);
 		json.putString("trustStore", trustStore);
@@ -120,6 +131,7 @@ public class SSLConfig {
 			sb.append(String.format("TrustStore: %s,", trustStore));
 			sb.append(String.format("TrustStore password set: %s,", new Boolean(trustStorePassword.length() > 0))
 					.toString());
+			sb.append(String.format("TrustAll: %s,", new Boolean(trustAll).toString()));
 		}
 		if (authRequired) {
 			sb.append(String.format("Auth required: %s,", "true"));
