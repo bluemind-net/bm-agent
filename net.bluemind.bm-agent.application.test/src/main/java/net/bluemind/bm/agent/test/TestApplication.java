@@ -80,7 +80,7 @@ public class TestApplication {
 		} catch (IOException e) {
 
 		}
-		AgentClientModule.stop();
+		AgentClientModule.stopAll();
 		AgentServerModule.stop();
 	}
 
