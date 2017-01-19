@@ -44,8 +44,14 @@ public class AgentClientModule implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Client");
 
-		ClientConfig config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
-		deployVerticles(config, () -> logger.info("Agent Client is running..."));
+		try {
+			ClientConfig config = ConfigReader.readConfig("bm-agent-client-config", "/etc/bm/agent/client-config.json");
+			deployVerticles(config, () -> logger.info("Agent Client is running..."));
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.warn("Could not start bm-agent-client module", e);
+			throw e;
+		}
 
 	}
 

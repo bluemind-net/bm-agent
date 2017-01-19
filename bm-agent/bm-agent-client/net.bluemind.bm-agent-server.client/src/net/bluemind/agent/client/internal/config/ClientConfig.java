@@ -59,7 +59,9 @@ public class ClientConfig {
 		config.putString("host", host);
 		config.putNumber("port", port);
 		config.putString("agentId", agentId);
-		config.putObject("sslConfig", sslConfig.toJson());
+		if (null != sslConfig) {
+			config.putObject("sslConfig", sslConfig.toJson());
+		}
 		return config;
 	}
 

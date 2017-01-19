@@ -58,21 +58,26 @@ public class AgentClient extends Verticle {
 
 	@Override
 	public void start() {
-		logger.info("Starting BM Agent Client");
-		config = new ClientConfig(container.config());
-		registerHandlers();
-		connect();
+		try {
+			logger.info("Starting BM Agent Client");
+			config = new ClientConfig(container.config());
+			registerHandlers();
+			connect();
 
-		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
-			String command = event.body().getString("command");
-			String commandId = event.body().getString("commandId");
-			byte[] data = event.body().getBinary("data");
+			vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
+				String command = event.body().getString("command");
+				String commandId = event.body().getString("commandId");
+				byte[] data = event.body().getBinary("data");
 
-			logger.debug("handling message to server {}, command: {}", config.agentId, command);
-			send(command, data);
-			JsonObject obj = new JsonObject().putString("commandId", commandId);
-			vertx.eventBus().send(AgentClientVerticle.address_command_done, obj);
-		});
+				logger.debug("handling message to server {}, command: {}", config.agentId, command);
+				send(command, data);
+				JsonObject obj = new JsonObject().putString("commandId", commandId);
+				vertx.eventBus().send(AgentClientVerticle.address_command_done, obj);
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.warn("Could not start bm-agent-client", e);
+		}
 
 	}
 
@@ -124,6 +129,8 @@ public class AgentClient extends Verticle {
 			logger.warn("Error on Connection: {}", t.getMessage());
 			connecting = false;
 		});
+
+		logger.info("Connecting to websocket on /bm-agent");
 
 		client.connectWebsocket("/bm-agent", (ws -> {
 			logger.info("Connected to websocket");

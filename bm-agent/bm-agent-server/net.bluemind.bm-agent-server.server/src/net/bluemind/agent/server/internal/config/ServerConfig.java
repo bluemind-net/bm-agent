@@ -55,7 +55,9 @@ public class ServerConfig {
 		JsonObject config = new JsonObject();
 		config.putString("listenerAddress", listenerAddress);
 		config.putNumber("port", port);
-		config.putObject("sslConfig", sslConfig.toJson());
+		if (null != sslConfig) {
+			config.putObject("sslConfig", sslConfig.toJson());
+		}
 		return config;
 	}
 

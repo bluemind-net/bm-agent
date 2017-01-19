@@ -45,8 +45,14 @@ public class AgentServerModule implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info("Starting BlueMind Agent Server");
 
-		ServerConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
-		deployVerticles(config, () -> logger.info("Agent Server is running..."));
+		try {
+			ServerConfig config = ConfigReader.readConfig("bm-agent-server-config", "/etc/bm/agent/server-config.json");
+			deployVerticles(config, () -> logger.info("Agent Server is running..."));
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.warn("Could not start bm-agent-server", e);
+			throw e;
+		}
 	}
 
 	private void deployVerticles(ServerConfig config, Runnable doneHandler) {
