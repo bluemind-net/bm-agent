@@ -119,11 +119,11 @@ to a port on the server side.
 Assuming you like to access an application on the client side on host 192.168.1.1 and port 2222 via the port 2223 on the server side (example server runs on port 8086) using an client with agentId agent1, you can initiate the port redirection via the REST command.
 
 HTTP method: GET
-Path: /agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223 
+Path: /bm-agent/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223 
 
 wget Example:
 ```
-wget "http://<server>:8086/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
+wget "http://<server>:8086/bm-agent/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
 ```
 
 This will open port 2223 on the server side. all data written to this socket will be transfered to client agentId and send to port 2222 on host 192.168.1.1 on the client side.
@@ -216,7 +216,7 @@ Executes a command. This can be used as an alternative to the REST command API t
 Example:
 To replace the REST API call 
 ```
-"http://<server>/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
+"http://<server>/bm-agent/agent1/port-redirect?port=2222&host=192.168.1.1&localPort=2223"
 ```
 you can use the command method as follows:
 ```Java
