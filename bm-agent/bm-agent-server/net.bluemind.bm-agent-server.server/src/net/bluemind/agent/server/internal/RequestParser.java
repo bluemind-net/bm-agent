@@ -40,6 +40,7 @@ public class RequestParser {
 		String method = request.method();
 		String path = request.path();
 		logger.info("Handling request to path {}", path);
+		path = path.replace("/bm-agent", "");
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}

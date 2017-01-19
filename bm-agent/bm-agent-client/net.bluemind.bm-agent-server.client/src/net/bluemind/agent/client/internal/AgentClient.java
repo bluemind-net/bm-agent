@@ -125,7 +125,7 @@ public class AgentClient extends Verticle {
 			connecting = false;
 		});
 
-		client.connectWebsocket("/", (ws -> {
+		client.connectWebsocket("/bm-agent", (ws -> {
 			logger.info("Connected to websocket");
 			connecting = false;
 			connected = true;
