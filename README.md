@@ -142,7 +142,7 @@ location /bm-agent-ws {
 
 # Example - Port Redirecting
 
-bm-agent comes packaged with a ready-to-use port redirecting plugin. The plugin allows you to expose a port in the internal network (client side)
+bm-agent comes packaged with a ready-to-use port-forwarding plugin. The plugin allows you to expose a port in the internal network (client side)
 to a port on the server side.
 
 Assuming you like to access an application on the client side on host 192.168.1.1 and port 2222 via the port 2223 on the server side (example server runs on port 8086) using an client with agentId agent1, you can initiate the port redirection via the REST command.
