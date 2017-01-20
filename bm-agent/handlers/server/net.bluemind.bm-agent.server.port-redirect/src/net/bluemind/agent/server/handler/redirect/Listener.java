@@ -112,7 +112,7 @@ public class Listener {
 			);
 			netSocket.dataHandler((Buffer buffer) -> {
 				byte[] data = buffer.getBytes();
-				logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
+				logger.debug("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 						clientId);
 				logger.trace("data: {}", new String(data));
 				byte[] messageData = createMessage(data, "");

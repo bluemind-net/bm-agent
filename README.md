@@ -112,6 +112,34 @@ You will find the generated logfiles under
 /var/log/bm-agent-server/
 ```  
 
+# Using bm-agent-server behind a proxy 
+
+bm-agent-server uses following paths:
+```
+/bm-agent-ws
+```
+The websocket connection
+```
+/bm-agent/
+```
+The Command REST API
+
+To forward requests via nginx, you can use this config (assuming your bm-agent-server runs on port 8086):
+```Javascript
+location /bm-agent-ws {
+   proxy_pass $scheme://127.0.0.1:8086/bm-agent-ws;
+   proxy_pass_request_headers      on;
+   proxy_http_version 1.1;
+   proxy_set_header Upgrade $http_upgrade;
+   proxy_set_header Connection "upgrade";
+  }
+
+  location ~ ^/bm-agent/(.*)$ {
+   proxy_pass $scheme://127.0.0.1:8086/bm-agent/$1/$is_args$args;
+   proxy_pass_request_headers      on;
+  }
+```
+
 # Example - Port Redirecting
 
 bm-agent comes packaged with a ready-to-use port redirecting plugin. The plugin allows you to expose a port in the internal network (client side)
