@@ -57,15 +57,14 @@ public class Listener {
 	}
 
 	public void start() throws Exception {
-
 		server = VertxHolder.vertices.get(VertxHolder.DEFAULT).createNetServer();
 		server.connectHandler((NetSocket netSocket) -> {
 			String clientId = UUID.randomUUID().toString();
+			logger.info("Got a port forwarding connection on local port using id {}", clientId);
 			ServerHandler serverHandler = new ServerHandler(clientId, netSocket, Listener.this);
 			serverHandlers.put(clientId, serverHandler);
 			serverHandler.init();
-		});
-		server.listen(hostPortConfig.localPort);
+		}).listen(hostPortConfig.localPort);
 	}
 
 	public void stop() {
@@ -98,6 +97,7 @@ public class Listener {
 		}
 
 		public void init() {
+			logger.debug("Sending syn/ack");
 			byte[] messageData = createMessage("".getBytes(), "syn/ack");
 			listener.connection.send(listener.agentId, listener.command, messageData);
 		}
@@ -113,14 +113,14 @@ public class Listener {
 			);
 			netSocket.dataHandler((Buffer buffer) -> {
 				byte[] data = buffer.getBytes();
-				logger.debug("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
+				logger.info("Received {} bytes from local client, redirecting to client-agent: {}", data.length,
 						clientId);
 				logger.trace("data: {}", new String(data));
 				byte[] messageData = createMessage(data, "");
 				listener.connection.send(listener.agentId, listener.command, messageData);
 			});
 			netSocket.exceptionHandler((Throwable event) -> {
-				logger.warn("Error occured while talking to local client {}:{}. Client may have disconnected", clientId,
+				logger.info("Error occured while talking to local client {}:{}. Client may have disconnected", clientId,
 						event.getMessage());
 				logger.trace("Error", event);
 			});
