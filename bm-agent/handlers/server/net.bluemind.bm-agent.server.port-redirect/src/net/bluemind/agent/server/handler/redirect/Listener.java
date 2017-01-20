@@ -97,7 +97,6 @@ public class Listener {
 		}
 
 		public void init() {
-			logger.debug("Sending syn/ack");
 			byte[] messageData = createMessage("".getBytes(), "syn/ack");
 			listener.connection.send(listener.agentId, listener.command, messageData);
 		}
