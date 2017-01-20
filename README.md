@@ -96,10 +96,11 @@ If the client should run in SSL mode, but no client authentication is required, 
 
 # Starting the application
 
-Be sure to start the server before starting up the clients.
 Both server and client can be started by executing the init scripts  
 ``` /etc/init.d/bm-agent-server start (stop, restart)```  
 ``` /etc/init.d/bm-agent-client start (stop, restart)```
+
+It is not necessary to start the applications in a specific order.
 
 # Logfiles
 
