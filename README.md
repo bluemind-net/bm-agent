@@ -554,7 +554,8 @@ To deploy your plugin you simply need to place it in the folder
 ``` /usr/share/bm-agent-client/extensions/ ```  
 respectively   
 ``` /usr/share/bm-agent-server/extensions/ ```  
-and restart the application
+and restart the application.
+If the application is running as a library included into your application, the plugin must be included into the application's classpath.
   
   
 
