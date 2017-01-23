@@ -114,7 +114,8 @@ public class AgentClient extends Verticle {
 		if (config.sslConfig.isSsl()) {
 			client.setSSL(true);
 			if (config.sslConfig.isTrustAll()) {
-				client.setTrustAll(config.sslConfig.isTrustAll());
+				client.setTrustAll(true) //
+				.setVerifyHost(false);
 			} else {
 				client.setTrustStorePath(config.sslConfig.getTrustStore()) //
 						.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
