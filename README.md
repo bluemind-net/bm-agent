@@ -163,6 +163,18 @@ You can disable a port redirection by calling the same URL using the HTTP method
 
 Both, client and server, can be embedded in your Java application and used as a library by adding following artifacts to your dependencies:
 ```XML
+
+<repositories>
+	<repository>
+		<id>nexus-central</id>
+		<url>http://forge.blue-mind.net/nexus/content/groups/public</url>
+		<snapshots>
+			<enabled>true</enabled>
+			<updatePolicy>daily</updatePolicy>
+		</snapshots>
+	</repository>
+</repositories>
+
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.common</artifactId>
