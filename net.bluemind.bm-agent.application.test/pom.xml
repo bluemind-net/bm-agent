@@ -26,6 +26,14 @@
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>bluemind-nexus</id>
+			<layout>default</layout>
+			<url>http://forge.blue-mind.net/nexus/content/repositories/snapshots</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 
 		<!-- bm-agent dependencies -->
