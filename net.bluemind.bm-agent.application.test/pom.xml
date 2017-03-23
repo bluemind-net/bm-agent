@@ -28,12 +28,16 @@
 
 	<repositories>
 		<repository>
-			<id>bluemind-nexus</id>
-			<layout>default</layout>
-			<url>http://forge.blue-mind.net/nexus/content/repositories/snapshots</url>
+			<id>nexus-central</id>
+			<url>http://forge.blue-mind.net/nexus/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
 		</repository>
 	</repositories>
 
+	
 	<dependencies>
 
 		<!-- bm-agent dependencies -->
