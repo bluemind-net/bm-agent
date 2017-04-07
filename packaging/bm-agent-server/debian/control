@@ -6,6 +6,6 @@ Standards-Version: 3.9.1
 
 Package: bm-agent-server
 Architecture: amd64
-Depends: bm-jdk | openjdk-8
+Depends: bm-jdk | openjdk-8 | default-jre
 Description: BlueMind agent server
  BlueMind agent server
