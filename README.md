@@ -178,19 +178,19 @@ Both, client and server, can be embedded in your Java application and used as a 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.common</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>org.eclipse.equinox.nonosgi</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.runtime.deps</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 	<type>pom</type>
 </dependency>
 ```
@@ -199,7 +199,7 @@ To embed the server, you will also need the artifact
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.server</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 ```
 To embed the client, you will need the artifact
@@ -207,7 +207,7 @@ To embed the client, you will need the artifact
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.client</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 ```
 The plugins ping and port forwarding are likewise available as maven artifacts:
@@ -216,26 +216,26 @@ The plugins ping and port forwarding are likewise available as maven artifacts:
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.server.ping</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 
 <!-- port-redirect handler implementations -->
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.server.port-redirect</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 </dependency>
 ```
 
