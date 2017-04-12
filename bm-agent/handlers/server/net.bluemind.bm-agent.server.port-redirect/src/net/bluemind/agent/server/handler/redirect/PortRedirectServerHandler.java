@@ -22,16 +22,20 @@
  */
 package net.bluemind.agent.server.handler.redirect;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import net.bluemind.agent.server.AgentServerHandler;
 import net.bluemind.agent.server.Command;
 import net.bluemind.agent.server.ServerConnection;
+import net.bluemind.agent.server.ServerStore;
 import net.bluemind.agent.server.handler.redirect.config.HostPortConfig;
 
 public class PortRedirectServerHandler implements AgentServerHandler {
@@ -39,6 +43,25 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	Logger logger = LoggerFactory.getLogger(PortRedirectServerHandler.class);
 
 	public static final Map<Integer, Listener> localServers = new ConcurrentHashMap<>();
+	private static List<Command> activeCommands = new ArrayList<>();
+	private static final String pluginStoreIdentifier = "PortRedirectServer";
+
+	@Override
+	public void onInitialize(ServerConnection connection) {
+		logger.info("Looking up saved commands");
+		String savedCommands = ServerStore.getStore(pluginStoreIdentifier);
+
+		if (null != savedCommands) {
+			JsonArray cmds = new JsonObject(savedCommands).asArray();
+			logger.info("Found {} saved commands", cmds.size());
+			for (int i = 0; i < cmds.size(); i++) {
+				cmds.forEach(command -> {
+					Command cmd = new Command(new JsonObject((String) command));
+					onCommand(cmd, connection);
+				});
+			}
+		}
+	}
 
 	@Override
 	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection) {
@@ -63,12 +86,15 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		switch (command.method) {
 		case GET:
 			initializePortRedirection(command.agentId, command.command, command.queryParameters, connection);
+			activeCommands.add(command);
 			break;
 		case DELETE:
 			deletePortRedirection(command.agentId, command.command, command.queryParameters, connection);
+			activeCommands.remove(command);
 			break;
 		default:
 		}
+		syncSavedCommands();
 
 	}
 
@@ -106,6 +132,14 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		} catch (Exception e) {
 			logger.warn("Cannot start port redirection listener");
 		}
+	}
+
+	private void syncSavedCommands() {
+		JsonArray commands = new JsonArray();
+		activeCommands.forEach(cmd -> {
+			commands.addObject(cmd.toJsonObject());
+		});
+		ServerStore.saveStore(pluginStoreIdentifier, commands.encode());
 	}
 
 }

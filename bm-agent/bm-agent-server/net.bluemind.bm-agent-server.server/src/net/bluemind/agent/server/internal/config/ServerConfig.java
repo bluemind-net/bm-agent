@@ -31,24 +31,28 @@ public class ServerConfig {
 	public String listenerAddress;
 	public int port;
 	public SSLConfig sslConfig;
+	public String storePath;
 
 	public ServerConfig() {
 
 	}
 
 	public ServerConfig(JsonObject config) {
-		this(config.getString("listenerAddress"), config.getInteger("port"), SSLConfig.fromJson(config));
+		this(config.getString("listenerAddress"), config.getInteger("port"), SSLConfig.fromJson(config),
+				config.getString("storePath", null));
 	}
 
-	public ServerConfig(String listenerAddress, int port, SSLConfig sslConfig) {
+	public ServerConfig(String listenerAddress, int port, SSLConfig sslConfig, String storePath) {
 		this.listenerAddress = listenerAddress;
 		this.port = port;
 		this.sslConfig = sslConfig;
+		this.storePath = storePath;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: listenerAddress: %d, port: %s, SSL: %s", listenerAddress, port, sslConfig.toString());
+		return String.format("%s: listenerAddress: %d, port: %s, SSL: %s, StorePath: %s", listenerAddress, port,
+				sslConfig.toString(), storePath);
 	}
 
 	public JsonObject toJsonObject() {
@@ -57,6 +61,9 @@ public class ServerConfig {
 		config.putNumber("port", port);
 		if (null != sslConfig) {
 			config.putObject("sslConfig", sslConfig.toJson());
+		}
+		if (null != storePath) {
+			config.putString("storePath", storePath);
 		}
 		return config;
 	}
@@ -83,6 +90,14 @@ public class ServerConfig {
 
 	public void setSslConfig(SSLConfig sslConfig) {
 		this.sslConfig = sslConfig;
+	}
+
+	public String getStorePath() {
+		return storePath;
+	}
+
+	public void setStorePath(String storePath) {
+		this.storePath = storePath;
 	}
 
 }

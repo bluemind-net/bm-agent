@@ -22,6 +22,7 @@
  */
 package net.bluemind.agent.server;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,6 +95,40 @@ public class Command {
 
 	public static enum METHOD {
 		GET, PUT, POST, DELETE;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((command == null) ? 0 : command.hashCode());
+		result = prime * result + Arrays.hashCode(pathParameters);
+		result = prime * result + ((queryParameters == null) ? 0 : queryParameters.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Command other = (Command) obj;
+		if (command == null) {
+			if (other.command != null)
+				return false;
+		} else if (!command.equals(other.command))
+			return false;
+		if (!Arrays.equals(pathParameters, other.pathParameters))
+			return false;
+		if (queryParameters == null) {
+			if (other.queryParameters != null)
+				return false;
+		} else if (!queryParameters.equals(other.queryParameters))
+			return false;
+		return true;
 	}
 
 }

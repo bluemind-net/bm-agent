@@ -42,6 +42,7 @@ import net.bluemind.agent.server.internal.handler.HandlerRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry.AgentHandler;
 
 public class AgentServerVerticle extends Verticle implements ServerConnection {
+	public static final String address_init = "agent.init";
 	public static final String address = "agent.message";
 	public static String address_command = "agent.command";
 	public static String address_command_done = "agent.command.done";
@@ -81,6 +82,15 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 			String commandId = event.body().getString("commandId");
 			currentCommandMap.get(commandId).handle();
 			currentCommandMap.remove(commandId);
+		});
+
+		eventBus.registerHandler(address_init, (Message<JsonObject> event) -> {
+			String commandId = event.body().getString("commandId");
+			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(commandId);
+			handler.ifPresent(h -> {
+				logger.info("Initializing plugin {}", commandId);
+				h.handler.onInitialize(AgentServerVerticle.this);
+			});
 		});
 
 	}

@@ -34,6 +34,10 @@ public class PingServerHandler implements AgentServerHandler {
 	Logger logger = LoggerFactory.getLogger(PingServerHandler.class);
 
 	@Override
+	public void onInitialize(ServerConnection connection) {
+	}
+
+	@Override
 	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection) {
 		logger.debug("Received a ping message from {}: {}", agentId, new String(data));
 		try {

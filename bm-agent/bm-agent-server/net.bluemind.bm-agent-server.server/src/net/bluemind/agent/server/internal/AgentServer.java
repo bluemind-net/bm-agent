@@ -37,6 +37,7 @@ import org.vertx.java.platform.Verticle;
 import net.bluemind.agent.BmMessage;
 import net.bluemind.agent.MessageParser;
 import net.bluemind.agent.server.Command;
+import net.bluemind.agent.server.ServerStore;
 import net.bluemind.agent.server.internal.config.ServerConfig;
 import net.bluemind.agent.server.internal.connection.ConnectionRegistry;
 import net.bluemind.agent.server.internal.handler.HandlerRegistry;
@@ -54,6 +55,7 @@ public class AgentServer extends Verticle {
 	@Override
 	public void start() {
 		ServerConfig config = new ServerConfig(container.config());
+		ServerStore.storePath = config.storePath;
 		logger.info("Starting BM Agent Server on port {}", config.port);
 		this.parser = new MessageParser();
 		registerHandlers();
@@ -145,6 +147,9 @@ public class AgentServer extends Verticle {
 		plugins.forEach(plugin -> {
 			logger.info("Registering plugin {} for command {}", plugin.name, plugin.command);
 			HandlerRegistry.getInstance().register(plugin.command, plugin.handler, plugin.name);
+			JsonObject obj = new JsonObject() //
+					.putString("commandId", plugin.command).asObject();
+			vertx.eventBus().send(AgentServerVerticle.address_init, obj);
 		});
 	}
 

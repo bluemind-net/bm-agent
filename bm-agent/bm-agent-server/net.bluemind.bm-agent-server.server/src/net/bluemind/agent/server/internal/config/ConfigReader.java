@@ -48,7 +48,7 @@ public class ConfigReader {
 		} catch (Exception e) {
 			logger.warn("Cannot load config from {}, using defaults", filepath);
 		}
-		return new ServerConfig("localhost", PORT, new SSLConfig());
+		return new ServerConfig("localhost", PORT, new SSLConfig(), null);
 	}
 
 }

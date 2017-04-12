@@ -86,7 +86,7 @@ public class TestApplication {
 
 	private static CompletableFuture<Void> startServer() {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL());
+		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL(), null);
 		AgentServerModule.run(serverConfig, () -> {
 			future.complete(null);
 		});
