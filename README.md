@@ -58,6 +58,7 @@ The server will search the configuration file using following path:
 {
       "listenerAddress" : "0.0.0.0",
       "port" : 8086,
+      "storePath" : <path to store folder>
       "sslConfig" : {
             "ssl" : true || false,
 	        "keyStore" : <path to keystore>,
@@ -68,7 +69,8 @@ The server will search the configuration file using following path:
       }
 }
 ```
-where ListenerAddress and port define the address and port the server should listen on.
+where listenerAddress and port define the address and port the server should listen on.
+storePath points to a writable directory where plugins can write configuration files. Its usage is optional.
 If you do not intend to use SSL, you can omit the sslConfig object or set "ssl" to false. If the server should run in SSL mode, but no client authentication is required, the value "authRequired" should be set to false and "trustStore" and "trustStorePassword" can be omited.
 
 ##### bm-agent-client
@@ -159,6 +161,8 @@ This will open port 2223 on the server side. all data written to this socket wil
 
 You can disable a port redirection by calling the same URL using the HTTP method DELETE.
 
+If you configured the storePath in your server configuration, the applied commands will be restored after an application restart.
+
 # Embedding bm-agent-client or bm-agent-server
 
 Both, client and server, can be embedded in your Java application and used as a library by adding following artifacts to your dependencies:
@@ -178,19 +182,19 @@ Both, client and server, can be embedded in your Java application and used as a 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.common</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>org.eclipse.equinox.nonosgi</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.runtime.deps</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 	<type>pom</type>
 </dependency>
 ```
@@ -199,7 +203,7 @@ To embed the server, you will also need the artifact
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.server</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 ```
 To embed the client, you will need the artifact
@@ -207,7 +211,7 @@ To embed the client, you will need the artifact
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.client</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 ```
 The plugins ping and port forwarding are likewise available as maven artifacts:
@@ -216,26 +220,26 @@ The plugins ping and port forwarding are likewise available as maven artifacts:
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.server.ping</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 
 <!-- port-redirect handler implementations -->
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.server.port-redirect</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 </dependency>
 ```
 
@@ -432,7 +436,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: <your plugin name>
 Bundle-SymbolicName: <your plugin name>;singleton:=true
-Bundle-Version: 3.1.0.qualifier
+Bundle-Version: 3.1.1.qualifier
 Bundle-Vendor: <you>
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.osgi,
