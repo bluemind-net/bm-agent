@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.agent</artifactId>
-	<version>3.1.1-SNAPSHOT</version>
+	<version>3.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>net.bluemind</groupId>
 		<artifactId>net.bluemind.agent.global</artifactId>
-		<version>3.1.1-SNAPSHOT</version>
+		<version>3.1.2-SNAPSHOT</version>
 		<relativePath>global/pom.xml</relativePath>
 	</parent>
 
