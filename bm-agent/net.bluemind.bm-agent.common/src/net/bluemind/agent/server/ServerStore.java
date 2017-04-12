@@ -25,7 +25,7 @@ package net.bluemind.agent.server;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +38,12 @@ public class ServerStore {
 
 	public static String getStore(String pluginId) {
 		if (storeActive()) {
-			File file = getStoreFile(pluginId);
-			logger.debug("Reading plugin store {} from {}", pluginId, file.getAbsolutePath());
+			Path file = getStorePath(pluginId);
+			logger.debug("Reading plugin store {} from {}", pluginId, file.toFile().getAbsolutePath());
 			try {
-				return new String(Files.readAllBytes(file.toPath()));
+				return new String(Files.readAllBytes(file));
 			} catch (IOException e) {
-				logger.warn("Cannot load store for plugin %s:%s", pluginId, e.getMessage());
+				logger.warn("Cannot load store for plugin {}:{}", pluginId, e.getMessage());
 			}
 		}
 		return null;
@@ -51,12 +51,12 @@ public class ServerStore {
 
 	public static void saveStore(String pluginId, String content) {
 		if (storeActive()) {
-			File file = getStoreFile(pluginId);
-			logger.info("Saving plugin store {} to {}", pluginId, file.getAbsolutePath());
+			Path file = getStorePath(pluginId);
+			logger.info("Saving plugin store {} to {}", pluginId, file.toFile().getAbsolutePath());
 			try {
-				Files.write(file.toPath(), content.getBytes(), StandardOpenOption.WRITE);
+				Files.write(file, content.getBytes());
 			} catch (IOException e) {
-				logger.warn("Cannot load store for plugin %s:%s", pluginId, e.getMessage());
+				logger.warn("Cannot load store for plugin {}:{}", pluginId, e.getMessage());
 			}
 		}
 	}
@@ -65,9 +65,8 @@ public class ServerStore {
 		return null != storePath && storePath.trim().length() > 0;
 	}
 
-	private static File getStoreFile(String pluginId) {
-		File file = new File(storePath, String.format("bm-agent-%s.config", pluginId));
-		return file;
+	private static Path getStorePath(String pluginId) {
+		return new File(storePath, String.format("bm-agent-%s.config", pluginId)).toPath();
 	}
 
 }

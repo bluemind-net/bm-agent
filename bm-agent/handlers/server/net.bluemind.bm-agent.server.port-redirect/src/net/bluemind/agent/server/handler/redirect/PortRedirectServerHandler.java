@@ -52,11 +52,11 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		String savedCommands = ServerStore.getStore(pluginStoreIdentifier);
 
 		if (null != savedCommands) {
-			JsonArray cmds = new JsonObject(savedCommands).asArray();
+			JsonArray cmds = new JsonArray(savedCommands);
 			logger.info("Found {} saved commands", cmds.size());
 			for (int i = 0; i < cmds.size(); i++) {
 				cmds.forEach(command -> {
-					Command cmd = new Command(new JsonObject((String) command));
+					Command cmd = new Command((JsonObject) command);
 					onCommand(cmd, connection);
 				});
 			}
@@ -85,6 +85,10 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	public void onCommand(Command command, ServerConnection connection) {
 		switch (command.method) {
 		case GET:
+			if (activeCommands.contains(command)) {
+				logger.info("Skipping command {}:{}, command is already active", command.agentId, command.command);
+				return;
+			}
 			initializePortRedirection(command.agentId, command.command, command.queryParameters, connection);
 			activeCommands.add(command);
 			break;
@@ -139,6 +143,7 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 		activeCommands.forEach(cmd -> {
 			commands.addObject(cmd.toJsonObject());
 		});
+		logger.info("Saving {} active port forwarding commands", commands.size());
 		ServerStore.saveStore(pluginStoreIdentifier, commands.encode());
 	}
 

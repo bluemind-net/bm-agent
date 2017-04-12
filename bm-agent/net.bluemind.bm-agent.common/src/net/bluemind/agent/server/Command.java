@@ -101,6 +101,7 @@ public class Command {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((agentId == null) ? 0 : agentId.hashCode());
 		result = prime * result + ((command == null) ? 0 : command.hashCode());
 		result = prime * result + Arrays.hashCode(pathParameters);
 		result = prime * result + ((queryParameters == null) ? 0 : queryParameters.hashCode());
@@ -116,6 +117,11 @@ public class Command {
 		if (getClass() != obj.getClass())
 			return false;
 		Command other = (Command) obj;
+		if (agentId == null) {
+			if (other.agentId != null)
+				return false;
+		} else if (!agentId.equals(other.agentId))
+			return false;
 		if (command == null) {
 			if (other.command != null)
 				return false;

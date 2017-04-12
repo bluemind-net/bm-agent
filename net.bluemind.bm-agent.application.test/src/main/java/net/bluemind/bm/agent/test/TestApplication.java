@@ -86,7 +86,10 @@ public class TestApplication {
 
 	private static CompletableFuture<Void> startServer() {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL(), null);
+		String tmpDir = null;
+		// activate this if you want the port-redirction to be persistent
+		// String tmpDir = System.getProperty("java.io.tmpdir");
+		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL(), tmpDir);
 		AgentServerModule.run(serverConfig, () -> {
 			future.complete(null);
 		});
