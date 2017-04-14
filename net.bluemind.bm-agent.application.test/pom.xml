@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.bluemind</groupId>
 		<artifactId>net.bluemind.agent</artifactId>
-		<version>3.1.2-SNAPSHOT</version>
+		<version>3.1.3-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -45,25 +45,25 @@
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent-server.server</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent-server.client</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent.common</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>org.eclipse.equinox.nonosgi</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 
@@ -72,13 +72,13 @@
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent.server.ping</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<!-- port-redirect handler implementations -->
@@ -86,13 +86,13 @@
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent.server.port-redirect</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 
@@ -101,7 +101,7 @@
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.bm-agent.runtime.deps</artifactId>
-			<version>3.1.2-SNAPSHOT</version>
+			<version>3.1.3-SNAPSHOT</version>
 			<type>pom</type>
 		</dependency>
 

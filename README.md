@@ -436,7 +436,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: <your plugin name>
 Bundle-SymbolicName: <your plugin name>;singleton:=true
-Bundle-Version: 3.1.1.qualifier
+Bundle-Version: 3.1.3.qualifier
 Bundle-Vendor: <you>
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.osgi,
