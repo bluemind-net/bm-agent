@@ -58,48 +58,64 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 		EventBus eventBus = vertx.eventBus();
 
 		eventBus.registerHandler(address, (Message<JsonObject> event) -> {
-			String command = event.body().getString("command");
-			String agentId = event.body().getString("agentId");
-			byte[] data = event.body().getBinary("data");
-			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
-			handler.ifPresent(h -> {
-				logger.debug("Found handler {} for command {}", h.info, command);
-				h.handler.onMessage(agentId, command, data, AgentServerVerticle.this);
-			});
+			handleIncomingMessage(event);
 		});
 
 		eventBus.registerHandler(address_command, (Message<JsonObject> event) -> {
-			Command command = new Command(event.body());
-			logger.debug("Searching handler {} for command {}", command.command);
-			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command.command);
-			handler.ifPresent(h -> {
-				logger.debug("Found handler {} for command {}", h.info, command.command);
-				String response = h.handler.onCommand(command, AgentServerVerticle.this);
-				response = null == response ? "" : response;
-				JsonObject message = new JsonObject() //
-						.putNumber("id", command.id) //
-						.putString("response", response) //
-						.asObject();
-				eventBus.publish(AgentServer.address_command_reply, message);
-			});
+			handleCommand(eventBus, event);
 
 		});
 
 		eventBus.registerHandler(address_command_done, (Message<JsonObject> event) -> {
-			String commandId = event.body().getString("commandId");
-			currentCommandMap.get(commandId).handle();
-			currentCommandMap.remove(commandId);
+			handleCommandResponse(event);
 		});
 
 		eventBus.registerHandler(address_init, (Message<JsonObject> event) -> {
-			String commandId = event.body().getString("commandId");
-			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(commandId);
-			handler.ifPresent(h -> {
-				logger.info("Initializing plugin {}", commandId);
-				h.handler.onInitialize(AgentServerVerticle.this);
-			});
+			initializePlugin(event);
 		});
 
+	}
+
+	private void initializePlugin(Message<JsonObject> event) {
+		String commandId = event.body().getString("commandId");
+		Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(commandId);
+		handler.ifPresent(h -> {
+			logger.info("Initializing plugin {}", commandId);
+			h.handler.onInitialize(AgentServerVerticle.this);
+		});
+	}
+
+	private void handleCommandResponse(Message<JsonObject> event) {
+		String commandId = event.body().getString("commandId");
+		currentCommandMap.get(commandId).handle();
+		currentCommandMap.remove(commandId);
+	}
+
+	private void handleCommand(EventBus eventBus, Message<JsonObject> event) {
+		Command command = new Command(event.body());
+		logger.debug("Searching handler {} for command {}", command.command);
+		Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command.command);
+		handler.ifPresent(h -> {
+			logger.debug("Found handler {} for command {}", h.info, command.command);
+			String response = h.handler.onCommand(command, AgentServerVerticle.this);
+			response = null == response ? "" : response;
+			JsonObject message = new JsonObject() //
+					.putNumber("id", command.id) //
+					.putString("response", response) //
+					.asObject();
+			eventBus.publish(AgentServer.address_command_reply, message);
+		});
+	}
+
+	private void handleIncomingMessage(Message<JsonObject> event) {
+		String command = event.body().getString("command");
+		String agentId = event.body().getString("agentId");
+		byte[] data = event.body().getBinary("data");
+		Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command);
+		handler.ifPresent(h -> {
+			logger.debug("Found handler {} for command {}", h.info, command);
+			h.handler.onMessage(agentId, command, data, AgentServerVerticle.this);
+		});
 	}
 
 	@Override

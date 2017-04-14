@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServer;
+import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.HttpServerResponse;
 import org.vertx.java.core.http.ServerWebSocket;
 import org.vertx.java.core.json.JsonObject;
@@ -68,80 +69,31 @@ public class AgentServer extends Verticle {
 				.setMaxWebSocketFrameSize(WS_FRAMESIZE);
 
 		if (config.sslConfig.isSsl()) {
-			server.setSSL(true) //
-					.setKeyStorePath(config.sslConfig.getKeyStore()) //
-					.setKeyStorePassword(config.sslConfig.getKeyStorePassword());
-			if (config.getSslConfig().isAuthRequired()) {
-				server.setClientAuthRequired(true) //
-						.setTrustStorePath(config.sslConfig.getTrustStore()) //
-						.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
-			}
+			configureSSL(config, server);
 		}
 
 		server.websocketHandler(ws -> {
 			logger.info("Connection to websocket established from client: {}",
 					ws.remoteAddress().getAddress().toString());
 			ws.dataHandler(data -> {
-				logger.trace("Read {} bytes from websocket", data.length());
-				String value = new String(data.getBytes());
-				handleMessage(ws, value);
+				handleIncomingMessage(ws, data);
 			});
 		}).requestHandler(request -> {
-			Command command = RequestParser.parse(request);
-			logger.info("Handling command {}:{}", command.agentId, command.command);
-			command.id = vertx.setTimer(30000, (id) -> {
-				logger.info("Command {} timed out, ending request", id);
-				responseMap.remove(id).end();
-			});
-			responseMap.put(command.id, request.response());
-			vertx.eventBus().send(AgentServerVerticle.address_command, command.toJsonObject());
+			handleCommand(request);
 		}).listen(config.port, config.listenerAddress);
 
 		vertx.eventBus().registerHandler(address_command_reply, (Message<JsonObject> event) -> {
-			long id = event.body().getLong("id");
-			if (responseMap.containsKey(id)) {
-				vertx.cancelTimer(id);
-				String response = event.body().getString("response");
-				if (!response.isEmpty()) {
-					responseMap.remove(id).end(response);
-				} else {
-					responseMap.remove(id).end();
-				}
-			}
+			handleCommandResponse(event);
 		});
 
 		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
-			String commandId = event.body().getString("commandId");
-			String command = event.body().getString("command");
-			String agentId = event.body().getString("agentId");
-			byte[] data = event.body().getBinary("data");
-
-			logger.debug("handling reply to client {}, command: {}", agentId, command);
-			Optional<ServerWebSocket> con = ConnectionRegistry.getInstance().get(agentId);
-			if (!con.isPresent()) {
-				logger.warn("Cannot send message to client {}, command: {}. Agent is not connected", agentId, command);
-			} else {
-				reply(command, agentId, data, con.get());
-			}
-			JsonObject obj = new JsonObject().putString("commandId", commandId);
-			vertx.eventBus().send(AgentServerVerticle.address_command_done, obj);
+			handleOutgoingMessage(event);
 		});
 	}
 
-	private void reply(String command, String agentId, byte[] data, ServerWebSocket con) {
-		BmMessage message = new BmMessage();
-		message.setCommand(command);
-		message.setData(data);
-		try {
-			Buffer buffer = new Buffer(parser.write(message));
-			logger.trace("Writing {} bytes to websocket", buffer.length());
-			con.write(buffer);
-		} catch (Exception e) {
-			logger.warn("Cannot send reply to client {}", agentId, e);
-		}
-	}
-
-	private void handleMessage(ServerWebSocket ws, String value) {
+	private void handleIncomingMessage(ServerWebSocket ws, Buffer data) {
+		logger.trace("Read {} bytes from websocket", data.length());
+		String value = new String(data.getBytes());
 		try {
 			BmMessage message = parser.read(value);
 			logger.debug("Incoming Message: {}", message);
@@ -157,7 +109,60 @@ public class AgentServer extends Verticle {
 		} catch (Exception e) {
 			logger.warn("Error while handling message", e);
 		}
+	}
 
+	private void handleOutgoingMessage(Message<JsonObject> event) {
+		String commandId = event.body().getString("commandId");
+		String command = event.body().getString("command");
+		String agentId = event.body().getString("agentId");
+		byte[] data = event.body().getBinary("data");
+
+		logger.debug("handling reply to client {}, command: {}", agentId, command);
+		Optional<ServerWebSocket> con = ConnectionRegistry.getInstance().get(agentId);
+		if (!con.isPresent()) {
+			logger.warn("Cannot send message to client {}, command: {}. Agent is not connected", agentId, command);
+		} else {
+			sendToClient(command, agentId, data, con.get());
+		}
+		JsonObject obj = new JsonObject().putString("commandId", commandId);
+		vertx.eventBus().send(AgentServerVerticle.address_command_done, obj);
+	}
+
+	private void sendToClient(String command, String agentId, byte[] data, ServerWebSocket con) {
+		BmMessage message = new BmMessage();
+		message.setCommand(command);
+		message.setData(data);
+		try {
+			Buffer buffer = new Buffer(parser.write(message));
+			logger.trace("Writing {} bytes to websocket", buffer.length());
+			con.write(buffer);
+		} catch (Exception e) {
+			logger.warn("Cannot send reply to client {}", agentId, e);
+		}
+	}
+
+	private void handleCommand(HttpServerRequest request) {
+		Command command = RequestParser.parse(request);
+		logger.info("Handling command {}:{}", command.agentId, command.command);
+		command.id = vertx.setTimer(30000, (id) -> {
+			logger.info("Command {} timed out, ending request", id);
+			responseMap.remove(id).end();
+		});
+		responseMap.put(command.id, request.response());
+		vertx.eventBus().send(AgentServerVerticle.address_command, command.toJsonObject());
+	}
+
+	private void handleCommandResponse(Message<JsonObject> event) {
+		long id = event.body().getLong("id");
+		if (responseMap.containsKey(id)) {
+			vertx.cancelTimer(id);
+			String response = event.body().getString("response");
+			if (!response.isEmpty()) {
+				responseMap.remove(id).end(response);
+			} else {
+				responseMap.remove(id).end();
+			}
+		}
 	}
 
 	private void registerHandlers() {
@@ -169,6 +174,17 @@ public class AgentServer extends Verticle {
 					.putString("commandId", plugin.command).asObject();
 			vertx.eventBus().send(AgentServerVerticle.address_init, obj);
 		});
+	}
+
+	private void configureSSL(ServerConfig config, HttpServer server) {
+		server.setSSL(true) //
+				.setKeyStorePath(config.sslConfig.getKeyStore()) //
+				.setKeyStorePassword(config.sslConfig.getKeyStorePassword());
+		if (config.getSslConfig().isAuthRequired()) {
+			server.setClientAuthRequired(true) //
+					.setTrustStorePath(config.sslConfig.getTrustStore()) //
+					.setTrustStorePassword(config.sslConfig.getTrustStorePassword());
+		}
 	}
 
 }
