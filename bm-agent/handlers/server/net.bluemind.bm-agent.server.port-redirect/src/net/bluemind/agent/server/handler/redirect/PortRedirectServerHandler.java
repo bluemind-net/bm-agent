@@ -82,12 +82,13 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 	}
 
 	@Override
-	public void onCommand(Command command, ServerConnection connection) {
+	public String onCommand(Command command, ServerConnection connection) {
+		logger.info("Handling port-redirect command {}:{}", command.method.name(), command.command);
 		switch (command.method) {
 		case GET:
 			if (activeCommands.contains(command)) {
 				logger.info("Skipping command {}:{}, command is already active", command.agentId, command.command);
-				return;
+				return null;
 			}
 			initializePortRedirection(command.agentId, command.command, command.queryParameters, connection);
 			activeCommands.add(command);
@@ -96,10 +97,16 @@ public class PortRedirectServerHandler implements AgentServerHandler {
 			deletePortRedirection(command.agentId, command.command, command.queryParameters, connection);
 			activeCommands.remove(command);
 			break;
+		case OPTIONS:
+			JsonArray commands = new JsonArray();
+			activeCommands.forEach(cmd -> {
+				commands.addObject(cmd.toJsonObject());
+			});
+			return commands.encode();
 		default:
 		}
 		syncSavedCommands();
-
+		return null;
 	}
 
 	private void deletePortRedirection(String agentId, String command, Map<String, String> queryParameters,

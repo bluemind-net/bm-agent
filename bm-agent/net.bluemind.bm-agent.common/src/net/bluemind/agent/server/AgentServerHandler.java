@@ -28,6 +28,6 @@ public interface AgentServerHandler {
 
 	public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
 
-	public void onCommand(Command command, ServerConnection connection);
+	public String onCommand(Command command, ServerConnection connection);
 
 }

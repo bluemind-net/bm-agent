@@ -22,7 +22,9 @@
  */
 package net.bluemind.agent.server.internal;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServer;
+import org.vertx.java.core.http.HttpServerResponse;
 import org.vertx.java.core.http.ServerWebSocket;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -47,8 +50,10 @@ import net.bluemind.agent.server.internal.handler.PluginLoader.ServerHandler;
 public class AgentServer extends Verticle {
 
 	public static final String address = "agent.reply";
+	public static final String address_command_reply = "command.reply";
 	private MessageParser parser;
 	private static final int WS_FRAMESIZE = 65536 * 4;
+	private static Map<Long, HttpServerResponse> responseMap = new HashMap<>();
 
 	private final Logger logger = LoggerFactory.getLogger(AgentServer.class);
 
@@ -84,9 +89,26 @@ public class AgentServer extends Verticle {
 		}).requestHandler(request -> {
 			Command command = RequestParser.parse(request);
 			logger.info("Handling command {}:{}", command.agentId, command.command);
-			request.response().end();
-			handleCommand(command);
+			command.id = vertx.setTimer(30000, (id) -> {
+				logger.info("Command {} timed out, ending request", id);
+				responseMap.remove(id).end();
+			});
+			responseMap.put(command.id, request.response());
+			vertx.eventBus().send(AgentServerVerticle.address_command, command.toJsonObject());
 		}).listen(config.port, config.listenerAddress);
+
+		vertx.eventBus().registerHandler(address_command_reply, (Message<JsonObject> event) -> {
+			long id = event.body().getLong("id");
+			if (responseMap.containsKey(id)) {
+				vertx.cancelTimer(id);
+				String response = event.body().getString("response");
+				if (!response.isEmpty()) {
+					responseMap.remove(id).end(response);
+				} else {
+					responseMap.remove(id).end();
+				}
+			}
+		});
 
 		vertx.eventBus().registerHandler(address, (Message<JsonObject> event) -> {
 			String commandId = event.body().getString("commandId");
@@ -136,10 +158,6 @@ public class AgentServer extends Verticle {
 			logger.warn("Error while handling message", e);
 		}
 
-	}
-
-	private void handleCommand(Command command) {
-		vertx.eventBus().send(AgentServerVerticle.address_command, command.toJsonObject());
 	}
 
 	private void registerHandlers() {

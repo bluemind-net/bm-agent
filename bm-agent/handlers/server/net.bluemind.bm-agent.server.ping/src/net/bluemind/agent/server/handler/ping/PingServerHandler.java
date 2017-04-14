@@ -49,8 +49,8 @@ public class PingServerHandler implements AgentServerHandler {
 	}
 
 	@Override
-	public void onCommand(Command command, ServerConnection connection) {
-
+	public String onCommand(Command command, ServerConnection connection) {
+		return null;
 	}
 
 }

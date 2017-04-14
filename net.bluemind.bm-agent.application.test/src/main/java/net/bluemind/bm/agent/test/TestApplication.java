@@ -67,6 +67,7 @@ public class TestApplication {
 				});
 
 		Thread.sleep(2000);
+		listActiveForwardings();
 		waitForQuit();
 	}
 
@@ -103,6 +104,12 @@ public class TestApplication {
 			future.complete(null);
 		});
 		return future;
+	}
+
+	private static void listActiveForwardings() {
+		Command command = new Command("OPTIONS", "port-redirect", "agent-1", new String[0], new HashMap<>());
+		String response = AgentServerModule.command(command);
+		logger.info("Active commands: {}", response);
 	}
 
 	private static void startPortForwarding() {

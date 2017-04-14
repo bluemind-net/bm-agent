@@ -35,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Command {
+	public long id;
 	public final METHOD method;
 	public final String command;
 	public final String agentId;
@@ -54,6 +55,7 @@ public class Command {
 
 	@SuppressWarnings("unchecked")
 	public Command(JsonObject body) {
+		this.id = body.getLong("id");
 		this.method = METHOD.valueOf(body.getString("method"));
 		this.command = body.getString("command");
 		this.agentId = body.getString("agentId");
@@ -85,6 +87,7 @@ public class Command {
 			logger.warn("Cannot process query parameters", e);
 		}
 		JsonObject obj = new JsonObject() //
+				.putNumber("id", this.id) //
 				.putString("agentId", this.agentId) //
 				.putString("method", this.method.name()) //
 				.putString("command", this.command) //
@@ -94,7 +97,7 @@ public class Command {
 	}
 
 	public static enum METHOD {
-		GET, PUT, POST, DELETE;
+		GET, PUT, POST, DELETE, OPTIONS;
 	}
 
 	@Override

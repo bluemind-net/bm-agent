@@ -24,6 +24,9 @@ package net.bluemind.agent.server;
 
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -33,9 +36,11 @@ import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
 
 import net.bluemind.agent.VertxHolder;
+import net.bluemind.agent.server.internal.AgentServer;
 import net.bluemind.agent.server.internal.AgentServerVerticle;
 import net.bluemind.agent.server.internal.config.ConfigReader;
 import net.bluemind.agent.server.internal.config.ServerConfig;
+import net.bluemind.agent.server.internal.handler.CommandReplyHandler;
 
 public class AgentServerModule implements BundleActivator {
 
@@ -88,9 +93,19 @@ public class AgentServerModule implements BundleActivator {
 		new AgentServerModule().deployVerticles(config, doneHandler);
 	}
 
-	public static void command(Command command) {
+	public static String command(Command command) {
 		VertxHolder.vertices.get(VertxHolder.DEFAULT).eventBus().send(AgentServerVerticle.address_command,
 				command.toJsonObject());
+		CountDownLatch await = new CountDownLatch(1);
+		AtomicReference<String> ref = new AtomicReference<>();
+		CommandReplyHandler replyHandler = new CommandReplyHandler(ref, command.id, await);
+		VertxHolder.vertices.get(VertxHolder.DEFAULT).eventBus().registerHandler(AgentServer.address_command_reply,
+				replyHandler);
+		try {
+			await.await(30000, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+		}
+		return ref.get();
 	}
 
 	public static void stop() {

@@ -70,10 +70,17 @@ public class AgentServerVerticle extends Verticle implements ServerConnection {
 
 		eventBus.registerHandler(address_command, (Message<JsonObject> event) -> {
 			Command command = new Command(event.body());
+			logger.debug("Searching handler {} for command {}", command.command);
 			Optional<AgentHandler> handler = HandlerRegistry.getInstance().get(command.command);
 			handler.ifPresent(h -> {
 				logger.debug("Found handler {} for command {}", h.info, command.command);
-				h.handler.onCommand(command, AgentServerVerticle.this);
+				String response = h.handler.onCommand(command, AgentServerVerticle.this);
+				response = null == response ? "" : response;
+				JsonObject message = new JsonObject() //
+						.putNumber("id", command.id) //
+						.putString("response", response) //
+						.asObject();
+				eventBus.publish(AgentServer.address_command_reply, message);
 			});
 
 		});
