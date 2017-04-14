@@ -94,6 +94,10 @@ public class AgentServerModule implements BundleActivator {
 	}
 
 	public static String command(Command command) {
+		if (command.id == 0) {
+			// use some high id to not interfere with vert.x timer ids
+			command.id = Long.MAX_VALUE - Math.round((Math.random() * Integer.MAX_VALUE));
+		}
 		VertxHolder.vertices.get(VertxHolder.DEFAULT).eventBus().send(AgentServerVerticle.address_command,
 				command.toJsonObject());
 		CountDownLatch await = new CountDownLatch(1);
