@@ -182,19 +182,19 @@ Both, client and server, can be embedded in your Java application and used as a 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.common</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>org.eclipse.equinox.nonosgi</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.runtime.deps</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 	<type>pom</type>
 </dependency>
 ```
@@ -203,7 +203,7 @@ To embed the server, you will also need the artifact
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.server</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 ```
 To embed the client, you will need the artifact
@@ -211,7 +211,7 @@ To embed the client, you will need the artifact
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent-server.client</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 ```
 The plugins ping and port forwarding are likewise available as maven artifacts:
@@ -220,26 +220,26 @@ The plugins ping and port forwarding are likewise available as maven artifacts:
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.server.ping</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 
 <!-- port-redirect handler implementations -->
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 
 <dependency>
 	<groupId>net.bluemind</groupId>
 	<artifactId>net.bluemind.bm-agent.server.port-redirect</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 </dependency>
 ```
 
@@ -291,6 +291,28 @@ Stops all clients
 
 # Example
 ```Java
+/* BEGIN LICENSE
+ * Copyright © Blue Mind SAS, 2012-2016
+ *
+ * This file is part of Blue Mind. Blue Mind is a messaging and collaborative
+ * solution.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of either the GNU Affero General Public License as
+ * published by the Free Software Foundation (version 3 of the License)
+ * or the CeCILL as published by CeCILL.info (version 2 of the License).
+ *
+ * There are special exceptions to the terms and conditions of the
+ * licenses as they are applied to this program. See LICENSE.txt in
+ * the directory of this program distribution.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * See LICENSE.txt
+ * END LICENSE
+ */
 package net.bluemind.bm.agent.test;
 
 import java.io.IOException;
@@ -338,6 +360,7 @@ public class TestApplication {
 				});
 
 		Thread.sleep(2000);
+		listActiveForwardings();
 		waitForQuit();
 	}
 
@@ -351,13 +374,16 @@ public class TestApplication {
 		} catch (IOException e) {
 
 		}
-		AgentClientModule.stop();
+		AgentClientModule.stopAll();
 		AgentServerModule.stop();
 	}
 
 	private static CompletableFuture<Void> startServer() {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL());
+		String tmpDir = null;
+		// activate this if you want the port-redirction to be persistent
+		// String tmpDir = System.getProperty("java.io.tmpdir");
+		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL(), tmpDir);
 		AgentServerModule.run(serverConfig, () -> {
 			future.complete(null);
 		});
@@ -371,6 +397,12 @@ public class TestApplication {
 			future.complete(null);
 		});
 		return future;
+	}
+
+	private static void listActiveForwardings() {
+		Command command = new Command("OPTIONS", "port-redirect", "agent-1", new String[0], new HashMap<>());
+		String response = AgentServerModule.command(command);
+		logger.info("Active commands: {}", response);
 	}
 
 	private static void startPortForwarding() {
@@ -519,15 +551,17 @@ net.bluemind.agent.server.AgentServerHandler
 ```Java
 public interface AgentServerHandler {
 
+   public void onInitialize(ServerConnection connection);
+
    public void onMessage(String agentId, String command, byte[] data, ServerConnection connection);
 
-   public void onCommand(Command command, ServerConnection connection);
+   public String onCommand(Command command, ServerConnection connection);
 
 }
 ```
-
-The method ``` onMessage ``` will be called when message from the client part of your plugin arrive.  
-The method ``` onCommand ``` will be called when REST messages for your plugin have been executed.
+The method ``` onInitialize ``` will be called during the startup when your plugin has been registered.  
+The method ``` onMessage ``` will be called when messages from the client part of your plugin arrive.  
+The method ``` onCommand ``` will be called when REST messages for your plugin have been executed. The return value will be sent to the calling client.
 
 ##### Registering the server
 
