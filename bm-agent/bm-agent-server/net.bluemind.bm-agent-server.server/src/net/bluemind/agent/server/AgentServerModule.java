@@ -45,6 +45,7 @@ import net.bluemind.agent.server.internal.handler.CommandReplyHandler;
 public class AgentServerModule implements BundleActivator {
 
 	private static Logger logger = LoggerFactory.getLogger(AgentServerModule.class);
+	private static ServerState state = ServerState.STOPPED;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -61,6 +62,7 @@ public class AgentServerModule implements BundleActivator {
 	}
 
 	private void deployVerticles(ServerConfig config, Runnable doneHandler) {
+		state = ServerState.STARTING;
 		PlatformManager pm = PlatformLocator.factory.createPlatformManager();
 		VertxHolder.vertices.put(VertxHolder.DEFAULT, pm.vertx());
 		VertxHolder.pms.put(VertxHolder.DEFAULT, pm);
@@ -72,6 +74,7 @@ public class AgentServerModule implements BundleActivator {
 				(s) -> doneCommHandler.complete(s.result()));
 		doneAgent.thenAcceptBoth(doneCommHandler, (a, b) -> {
 			logger.info("Deployed verticles {} and {}", a, b);
+			state = ServerState.RUNNING;
 			doneHandler.run();
 		});
 	}
@@ -79,6 +82,7 @@ public class AgentServerModule implements BundleActivator {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		logger.info("Stopping BlueMind Agent Server");
+		state = ServerState.STOPPED;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -91,6 +95,10 @@ public class AgentServerModule implements BundleActivator {
 
 	public static void run(ServerConfig config, Runnable doneHandler) {
 		new AgentServerModule().deployVerticles(config, doneHandler);
+	}
+
+	public static ServerState getState() {
+		return state;
 	}
 
 	public static String command(Command command) {
@@ -111,9 +119,11 @@ public class AgentServerModule implements BundleActivator {
 	}
 
 	public static void stop() {
+		state = ServerState.STOPPING;
 		VertxHolder.pms.keySet()
 				.forEach((id) -> VertxHolder.pms.get(id).undeployAll((r) -> VertxHolder.vertices.get(id).stop()));
 		VertxHolder.reset();
+		state = ServerState.STOPPED;
 	}
 
 }

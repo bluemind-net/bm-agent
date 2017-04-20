@@ -57,7 +57,7 @@ public class TestApplication {
 	private static final Logger logger = LoggerFactory.getLogger(TestApplication.class);
 
 	public static void main(String[] args) throws Exception {
-
+		logServerState();
 		TestApplication.startServer() //
 				.thenCompose(TestApplication::startClient) //
 				.thenRun(TestApplication::startPortForwarding) //
@@ -69,6 +69,10 @@ public class TestApplication {
 		Thread.sleep(2000);
 		listActiveForwardings();
 		waitForQuit();
+	}
+
+	private static void logServerState() {
+		logger.info("Server state: {}", AgentServerModule.getState().name());
 	}
 
 	private static void waitForQuit() {
@@ -83,6 +87,7 @@ public class TestApplication {
 		}
 		AgentClientModule.stopAll();
 		AgentServerModule.stop();
+		logServerState();
 	}
 
 	private static CompletableFuture<Void> startServer() {
@@ -93,7 +98,9 @@ public class TestApplication {
 		ServerConfig serverConfig = new ServerConfig(serverListenerAddress, serverPort, SSLConfig.noSSL(), tmpDir);
 		AgentServerModule.run(serverConfig, () -> {
 			future.complete(null);
+			logServerState();
 		});
+		logServerState();
 		return future;
 	}
 
