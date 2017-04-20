@@ -81,19 +81,19 @@
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.eclipse.common</artifactId>
-			<version>3.1.20462</version>
+			<version>3.1.30462</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.lib.jackson</artifactId>
-			<version>3.1.20462</version>
+			<version>3.1.30462</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.bluemind</groupId>
 			<artifactId>net.bluemind.lib.vertx</artifactId>
-			<version>3.1.20462</version>
+			<version>3.1.30462</version>
 		</dependency>
 
 		<dependency>
