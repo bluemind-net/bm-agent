@@ -26,12 +26,12 @@
 		<repository>
 			<id>bluemind-deps</id>
 			<layout>p2</layout>
-			<url>http://forge.blue-mind.net/staging/p2/dependencies/current/</url>
+			<url>http://forge.bluemind.net/staging/p2/dependencies/current/</url>
 		</repository>
 		<repository>
 			<id>bluemind-plugins</id>
 			<layout>p2</layout>
-			<url>http://forge.blue-mind.net/staging/p2/bluemind/</url>
+			<url>http://forge.bluemind.net/staging/p2/bluemind/latest</url>
 		</repository>
 		<repository>
 			<id>tigase</id>
@@ -45,7 +45,7 @@
 
 		<repository>
 			<id>nexus-central</id>
-			<url>http://forge.blue-mind.net/nexus/content/groups/public</url>
+			<url>http://forge.bluemind.net/nexus/content/groups/public</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>daily</updatePolicy>
@@ -57,7 +57,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>bm-maven-plugins</id>
-			<url>http://forge.blue-mind.net/nexus/content/repositories/snapshots</url>
+			<url>http://forge.bluemind.net/nexus/content/repositories/snapshots</url>
 
 			<snapshots>
 				<enabled>true</enabled>
@@ -67,7 +67,7 @@
 
 		<pluginRepository>
 			<id>bm-maven-plugins-releases</id>
-			<url>http://forge.blue-mind.net/nexus/content/repositories/releases</url>
+			<url>http://forge.bluemind.net/nexus/content/repositories/releases</url>
 
 			<snapshots>
 				<enabled>true</enabled>
@@ -313,11 +313,11 @@
 	<distributionManagement>
 		<repository>
 			<id>bm_releases</id>
-			<url>http://forge.blue-mind.net/nexus/content/repositories/releases</url>
+			<url>http://forge.bluemind.net/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>bm_snapshots</id>
-			<url>http://forge.blue-mind.net/nexus/content/repositories/snapshots</url>
+			<url>http://forge.bluemind.net/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
