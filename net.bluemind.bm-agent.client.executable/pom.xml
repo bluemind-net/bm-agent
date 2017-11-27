@@ -1,0 +1,112 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>net.bluemind.bm-agent.application.test</artifactId>
+
+	<parent>
+		<groupId>net.bluemind</groupId>
+		<artifactId>net.bluemind.agent</artifactId>
+		<version>3.1.4-SNAPSHOT</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>dependency-jars/</classpathPrefix>
+							<mainClass>net.bluemind.bm.agent.client.executable.Launcher</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>
+								${project.build.directory}/dependency-jars/
+							</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>nexus-central</id>
+			<url>http://forge.blue-mind.net/nexus/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	
+	<dependencies>
+
+		<!-- bm-agent dependencies -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent-server.client</artifactId>
+			<version>3.1.4-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.common</artifactId>
+			<version>3.1.4-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>org.eclipse.equinox.nonosgi</artifactId>
+			<version>3.1.4-SNAPSHOT</version>
+		</dependency>
+
+
+		<!-- ping handler implementations -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.client.ping</artifactId>
+			<version>3.1.4-SNAPSHOT</version>
+		</dependency>
+
+		<!-- port-redirect handler implementations -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.client.port-redirect</artifactId>
+			<version>3.1.4-SNAPSHOT</version>
+		</dependency>
+
+		<!-- dependencies needed by bm-agent-server respectively bm-agent-client -->
+
+		<dependency>
+			<groupId>net.bluemind</groupId>
+			<artifactId>net.bluemind.bm-agent.runtime.deps</artifactId>
+			<version>3.1.4-SNAPSHOT</version>
+			<type>pom</type>
+		</dependency>
+
+	</dependencies>
+
+
+</project>

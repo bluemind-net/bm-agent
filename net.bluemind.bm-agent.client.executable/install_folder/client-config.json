@@ -1,0 +1,13 @@
+{
+      "agentId" : "agent-idX",
+      "host" : "<server>",
+      "port" : 8086,
+      "sslConfig" : {
+            "ssl" : true || false,
+            "trustAll" : true || false,
+	        "trustStore" : <path to truststore>,
+	        "trustStorePassword" : <truststore password>,
+	        "authRequired" : true || false,
+	        "keyStore" : <path to keystore>,
+	        "keyStorePassword" : <keystore password>,
+}
