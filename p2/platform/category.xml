@@ -16,10 +16,10 @@
    <bundle id="javax.inject" version="1.0.0.v20091030"/>
    <bundle id="jcl.over.slf4j" version="1.7.5"/>
    <bundle id="jul.to.slf4j" version="1.7.5"/>
-   <bundle id="net.bluemind.eclipse.common" version="3.1.0.qualifier"/>
-   <bundle id="net.bluemind.lib.jackson" version="3.1.0.qualifier"/>
-   <bundle id="net.bluemind.slf4j" version="3.1.0.qualifier"/>
-   <bundle id="net.bluemind.slf4j.configuration" version="3.1.0.qualifier"/>
+   <bundle id="net.bluemind.eclipse.common"/>
+   <bundle id="net.bluemind.lib.jackson"/>
+   <bundle id="net.bluemind.slf4j"/>
+   <bundle id="net.bluemind.slf4j.configuration"/>
    <bundle id="org.eclipse.core.contenttype" version="3.5.100.v20160418-1621"/>
    <bundle id="org.eclipse.core.jobs" version="3.8.0.v20160509-0411"/>
    <bundle id="org.eclipse.core.runtime" version="3.12.0.v20160606-1342"/>
