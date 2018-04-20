@@ -19,62 +19,30 @@
 		<sonar.jacoco.reportPath>${session.executionRootDirectory}/target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.excludes>**/*Tests*.class,**/closed/**/**,**/open/plugins/**/**,**/open/ui/**/**,**/open/clients/**/**</sonar.jacoco.excludes>
 		<l10n.list>"de", "en", "es", "fr", "hu", "it", "nl", "pl", "ru", "sk",
-			"uk", "zh"</l10n.list>
+		"uk", "zh"</l10n.list>
+                <bm.version>3.1.28073</bm.version>
 	</properties>
 
 	<repositories>
+		<repository>
+			<id>bm-nexus</id>
+			<url>http://forge.bluemind.net/nexus/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>bm-releases</id>
+			<url>http://pkg.blue-mind.net/mvn/</url>
+		</repository>
+		<repository>
+			<id>bluemind</id>
+			<layout>p2</layout>
+			<url>http://forge.bluemind.net/staging/p2/bluemind/latest</url>
+		</repository>
 		<repository>
 			<id>bluemind-deps</id>
 			<layout>p2</layout>
 			<url>http://forge.bluemind.net/staging/p2/dependencies/current/</url>
 		</repository>
-		<repository>
-			<id>bluemind-plugins</id>
-			<layout>p2</layout>
-			<url>http://forge.bluemind.net/staging/p2/bluemind/latest</url>
-		</repository>
-		<repository>
-			<id>tigase</id>
-			<url>http://build.tigase.org/maven</url>
-
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-			</snapshots>
-		</repository>
-
-		<repository>
-			<id>nexus-central</id>
-			<url>http://forge.bluemind.net/nexus/content/groups/public</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-			</snapshots>
-		</repository>
-
 	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>bm-maven-plugins</id>
-			<url>http://forge.bluemind.net/nexus/content/repositories/snapshots</url>
-
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-			</snapshots>
-		</pluginRepository>
-
-		<pluginRepository>
-			<id>bm-maven-plugins-releases</id>
-			<url>http://forge.bluemind.net/nexus/content/repositories/releases</url>
-
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<build>
 		<plugins>
@@ -309,17 +277,6 @@
 
 		</pluginManagement>
 	</build>
-
-	<distributionManagement>
-		<repository>
-			<id>bm_releases</id>
-			<url>http://forge.bluemind.net/nexus/content/repositories/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>bm_snapshots</id>
-			<url>http://forge.bluemind.net/nexus/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<dependencies>
 		<dependency>
